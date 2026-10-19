@@ -1,0 +1,8 @@
+{
+  "tomorrow": "morgen",
+  "pair": { "device_name": "Frank Energie prijzen" },
+  "warning": {
+    "fetch_failed": "Frank Energie is niet bereikbaar, de laatst bekende prijzen worden getoond",
+    "no_prices": "Nog geen prijzen beschikbaar"
+  }
+}

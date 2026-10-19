@@ -1,0 +1,8 @@
+{
+  "tomorrow": "tomorrow",
+  "pair": { "device_name": "Frank Energie prices" },
+  "warning": {
+    "fetch_failed": "Could not reach Frank Energie, showing the last known prices",
+    "no_prices": "No prices available yet"
+  }
+}
