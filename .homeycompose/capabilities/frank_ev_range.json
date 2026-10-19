@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Range", "nl": "Actieradius"}, "getable": true, "setable": false, "units": {"en": "km"}, "decimals": 0, "uiComponent": "sensor", "icon": "/assets/ev.svg", "insights": true}

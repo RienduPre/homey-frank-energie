@@ -1,6 +1,6 @@
 {
   "name": "nl.riendupre.frankenergie",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Frank Energie app for Homey Pro",
   "main": "app.js",

@@ -1,7 +1,7 @@
 'use strict';
 
 const PriceDevice = require('../../lib/PriceDevice');
-const { FrankEnergieApi, FrankEnergieAuthError } = require('../../lib/FrankEnergieApi');
+const { FrankEnergieAuthError } = require('../../lib/FrankEnergieApi');
 const P = require('../../lib/prices');
 
 const ACCOUNT_REFRESH_MS = 60 * 60 * 1000; // account data changes at most daily
@@ -30,17 +30,15 @@ class AccountDevice extends PriceDevice {
     return this.getData().id;
   }
 
+  /** The login is shared app-wide; v0.2.0 kept it in this device's store. */
   createApi() {
-    return new FrankEnergieApi({
-      tokens: this.getStoreValue('tokens'),
-      onTokens: (tokens) => this.setStoreValue('tokens', tokens).catch((e) => this.error(e)),
-    });
+    const app = this.homey.app;
+    app.adoptTokens(this.getStoreValue('tokens'));
+    return app.api;
   }
 
-  /** Called from the repair flow with fresh tokens. */
-  async setTokens(tokens) {
-    await this.setStoreValue('tokens', tokens);
-    this.api = this.createApi();
+  /** Called by the app after a new login (pairing or repair). */
+  async onReauthenticated() {
     this.authFailed = false;
     await this.setAvailable().catch(() => {});
     await this.refresh().catch((e) => this.error(e));
@@ -90,7 +88,9 @@ class AccountDevice extends PriceDevice {
 
     const [summary, usage, invoices] = results.map((r) => (r.status === 'fulfilled' ? r.value : undefined));
     results.forEach((r, i) => {
-      if (r.status === 'rejected') this.log(['monthSummary', 'periodUsageAndCosts', 'invoices'][i], 'failed:', r.reason.message);
+      const name = ['monthSummary', 'periodUsageAndCosts', 'invoices'][i];
+      if (r.status === 'rejected') this.log(name, 'failed:', r.reason.message);
+      else if (!r.value) this.log(name, 'returned no data for', ref);
     });
 
     if (summary) {

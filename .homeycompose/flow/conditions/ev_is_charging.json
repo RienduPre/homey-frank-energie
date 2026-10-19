@@ -1,0 +1,1 @@
+{"id": "ev_is_charging", "title": {"en": "Is !{{|not}} charging", "nl": "Is !{{|niet}} aan het laden"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=ev"}]}

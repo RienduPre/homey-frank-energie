@@ -1,0 +1,1 @@
+{"id": "ev_charging_started", "title": {"en": "Started charging", "nl": "Begon met laden"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=ev"}], "tokens": [{"name": "battery", "type": "number", "title": {"en": "Battery level", "nl": "Accuniveau"}, "example": 64}]}

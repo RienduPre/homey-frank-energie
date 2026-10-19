@@ -2,6 +2,7 @@
 
 const Homey = require('homey');
 const P = require('./lib/prices');
+const { FrankEnergieApi } = require('./lib/FrankEnergieApi');
 
 const TRIGGERS = [
   'price_changed', 'price_below', 'price_above',
@@ -9,13 +10,64 @@ const TRIGGERS = [
   'cheapest_block_started', 'tomorrow_available',
 ];
 
+/** Drivers whose devices use the Frank account login. */
+const ACCOUNT_DRIVERS = ['account', 'battery', 'ev', 'pv'];
+
 /**
  * Price flow cards are app-wide and work for both the "Dynamic prices"
  * and the "Frank account" devices (device argument filter in the card).
+ *
+ * The app holds the one Frank login (tokens) that all account devices share,
+ * so a token renewal by one device never invalidates another.
  */
 class FrankEnergieApp extends Homey.App {
 
   async onInit() {
+    this.api = new FrankEnergieApi({
+      tokens: this.homey.settings.get('tokens'),
+      onTokens: (tokens) => this.homey.settings.set('tokens', tokens),
+    });
+
+    this.registerPriceCards();
+    this.registerEvCards();
+    this.log('Frank Energie app started');
+  }
+
+  // ------------------------------------------------------------------ login
+
+  /** New tokens after a login (pairing or repair): store and wake all devices. */
+  async setTokens(tokens) {
+    this.homey.settings.set('tokens', tokens);
+    this.api.setTokens(tokens);
+    for (const device of this.accountDevices()) {
+      if (typeof device.onReauthenticated === 'function') {
+        await device.onReauthenticated().catch((e) => this.error(e));
+      }
+    }
+  }
+
+  /** Migration from v0.2.0, where tokens lived in the account device store. */
+  adoptTokens(tokens) {
+    if (this.api.isAuthenticated || !tokens || !tokens.authToken) return;
+    this.homey.settings.set('tokens', tokens);
+    this.api.setTokens(tokens);
+  }
+
+  accountDevices() {
+    const devices = [];
+    for (const id of ACCOUNT_DRIVERS) {
+      try {
+        devices.push(...this.homey.drivers.getDriver(id).getDevices());
+      } catch (err) {
+        // driver not ready yet
+      }
+    }
+    return devices;
+  }
+
+  // ------------------------------------------------------------ price cards
+
+  registerPriceCards() {
     this.triggers = {};
     for (const id of TRIGGERS) this.triggers[id] = this.homey.flow.getDeviceTriggerCard(id);
 
@@ -44,8 +96,22 @@ class FrankEnergieApp extends Homey.App {
 
     this.homey.flow.getActionCard('refresh')
       .registerRunListener(async ({ device }) => device.refresh());
+  }
 
-    this.log('Frank Energie app started');
+  // --------------------------------------------------------------- EV cards
+
+  registerEvCards() {
+    for (const id of ['ev_charging_started', 'ev_charging_stopped', 'ev_plugged_in', 'ev_unplugged']) {
+      this.triggers[id] = this.homey.flow.getDeviceTriggerCard(id);
+    }
+    this.homey.flow.getConditionCard('ev_is_charging')
+      .registerRunListener(async ({ device }) => device.getCapabilityValue('frank_ev_charging') === true);
+    this.homey.flow.getConditionCard('ev_is_plugged_in')
+      .registerRunListener(async ({ device }) => device.getCapabilityValue('frank_ev_plugged_in') === true);
+    this.homey.flow.getConditionCard('ev_smart_charging_on')
+      .registerRunListener(async ({ device }) => device.getCapabilityValue('frank_smart_charging') === true);
+    this.homey.flow.getActionCard('ev_set_smart_charging')
+      .registerRunListener(async ({ device, state }) => device.setSmartCharging(state === 'on'));
   }
 
   /**

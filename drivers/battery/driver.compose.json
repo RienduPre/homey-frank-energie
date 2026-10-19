@@ -1,0 +1,87 @@
+{
+  "name": {
+    "en": "Home battery (Smart Trading)",
+    "nl": "Thuisbatterij (Smart Trading)"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "measure_battery",
+    "frank_battery_status",
+    "frank_battery_mode",
+    "frank_trading_result_today",
+    "frank_trading_result_yesterday",
+    "frank_trading_result_month",
+    "frank_trading_result_total",
+    "frank_battery_last_update"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "usernameLabel": {
+          "en": "E-mail address",
+          "nl": "E-mailadres"
+        },
+        "usernamePlaceholder": {
+          "en": "you@example.com",
+          "nl": "jij@voorbeeld.nl"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        },
+        "passwordPlaceholder": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        }
+      },
+      "navigation": {
+        "next": "list_devices"
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "usernameLabel": {
+          "en": "E-mail address",
+          "nl": "E-mailadres"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        }
+      }
+    }
+  ],
+  "energy": {
+    "batteries": [
+      "INTERNAL"
+    ]
+  }
+}

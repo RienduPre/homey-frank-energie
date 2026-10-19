@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Charge limit", "nl": "Laadlimiet"}, "getable": true, "setable": false, "units": {"en": "%"}, "decimals": 0, "uiComponent": "sensor", "icon": "/assets/battery.svg", "insights": false}

@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Total result", "nl": "Totaal resultaat"}, "getable": true, "setable": false, "units": {"en": "€"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": true}

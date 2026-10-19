@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Smart charging", "nl": "Slim laden"}, "getable": true, "setable": true, "uiComponent": "toggle", "icon": "/assets/ev.svg", "insights": true, "insightsTitleTrue": {"en": "Smart charging on", "nl": "Slim laden aan"}, "insightsTitleFalse": {"en": "Smart charging off", "nl": "Slim laden uit"}}

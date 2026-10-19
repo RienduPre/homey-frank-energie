@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Trading result this month", "nl": "Handelsresultaat deze maand"}, "getable": true, "setable": false, "units": {"en": "€"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": true}

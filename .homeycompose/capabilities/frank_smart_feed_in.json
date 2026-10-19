@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Smart feed-in", "nl": "Slim terugleveren"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/sun.svg", "insights": true, "insightsTitleTrue": {"en": "Smart feed-in on", "nl": "Slim terugleveren aan"}, "insightsTitleFalse": {"en": "Smart feed-in off", "nl": "Slim terugleveren uit"}}

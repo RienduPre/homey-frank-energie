@@ -1,0 +1,1 @@
+{"id": "ev_smart_charging_on", "title": {"en": "Smart charging is !{{on|off}}", "nl": "Slim laden staat !{{aan|uit}}"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=ev"}]}

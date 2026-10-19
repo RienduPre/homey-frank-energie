@@ -1,0 +1,1 @@
+{"type": "string", "title": {"en": "Battery status", "nl": "Batterijstatus"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/battery.svg"}

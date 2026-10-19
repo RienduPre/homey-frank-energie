@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Charging", "nl": "Aan het laden"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/ev.svg", "insights": true, "insightsTitleTrue": {"en": "Started charging", "nl": "Begon met laden"}, "insightsTitleFalse": {"en": "Stopped charging", "nl": "Stopte met laden"}}

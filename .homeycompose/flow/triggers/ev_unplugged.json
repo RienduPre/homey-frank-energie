@@ -1,0 +1,1 @@
+{"id": "ev_unplugged", "title": {"en": "Was unplugged", "nl": "Is losgekoppeld"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=ev"}], "tokens": [{"name": "battery", "type": "number", "title": {"en": "Battery level", "nl": "Accuniveau"}, "example": 64}]}

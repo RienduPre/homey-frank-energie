@@ -1,4 +1,5 @@
 {
   "0.1.0": { "en": "Dynamic prices device", "nl": "Apparaat voor dynamische prijzen" },
-  "0.2.0": { "en": "Frank account: customer prices, monthly costs, usage and invoices", "nl": "Frank-account: eigen prijzen, maandkosten, verbruik en facturen" }
+  "0.2.0": { "en": "Frank account: customer prices, monthly costs, usage and invoices", "nl": "Frank-account: eigen prijzen, maandkosten, verbruik en facturen" },
+  "0.3.0": { "en": "Home battery (Smart Trading), car and charger (Smart Charging) and solar (smart feed-in); one shared Frank login", "nl": "Thuisbatterij (Smart Trading), auto en laadpaal (Slim Laden) en zonnepanelen (slim terugleveren); één gedeelde Frank-login" }
 }

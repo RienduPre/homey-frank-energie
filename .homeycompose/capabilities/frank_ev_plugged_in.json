@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Plugged in", "nl": "Aangesloten"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/plug.svg", "insights": true, "insightsTitleTrue": {"en": "Plugged in", "nl": "Aangesloten"}, "insightsTitleFalse": {"en": "Unplugged", "nl": "Losgekoppeld"}}
