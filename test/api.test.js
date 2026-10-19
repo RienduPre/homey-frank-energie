@@ -1,0 +1,88 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { FrankEnergieApi, FrankEnergieAuthError, jwtExpiry } = require('../lib/FrankEnergieApi');
+
+function jwt(expSeconds) {
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  return `${b64({ alg: 'none' })}.${b64({ exp: expSeconds })}.sig`;
+}
+
+/** Fake fetch that answers by operation name and records calls. */
+function fakeFetch(handlers) {
+  const calls = [];
+  const fn = async (url, opts) => {
+    const body = JSON.parse(opts.body);
+    calls.push({ op: body.operationName, auth: opts.headers.Authorization || null, vars: body.variables });
+    const h = handlers[body.operationName];
+    const out = typeof h === 'function' ? h(body, opts, calls) : h;
+    const status = out && out.status ? out.status : 200;
+    return { ok: status < 400, status, json: async () => out.body || out };
+  };
+  fn.calls = calls;
+  return fn;
+}
+
+test('jwtExpiry decodes exp claim', () => {
+  assert.equal(jwtExpiry(jwt(1800000000)), 1800000000 * 1000);
+  assert.equal(jwtExpiry('not-a-jwt'), null);
+});
+
+test('login stores tokens and reports them', async () => {
+  let saved = null;
+  const fetch = fakeFetch({ Login: { data: { login: { authToken: jwt(9999999999), refreshToken: 'r1' } } } });
+  const api = new FrankEnergieApi({ fetch, onTokens: (t) => { saved = t; } });
+  await api.login('a@b.nl', 'pw');
+  assert.equal(api.isAuthenticated, true);
+  assert.equal(saved.refreshToken, 'r1');
+  assert.equal(fetch.calls[0].auth, null); // login itself is unauthenticated
+});
+
+test('invalid password raises auth error', async () => {
+  const fetch = fakeFetch({ Login: { errors: [{ message: 'user-error:password-invalid' }] } });
+  const api = new FrankEnergieApi({ fetch });
+  await assert.rejects(api.login('a@b.nl', 'x'), (e) => e instanceof FrankEnergieAuthError && e.code === 'password-invalid');
+});
+
+test('expired token is renewed before the query', async () => {
+  const fresh = jwt(9999999999);
+  const fetch = fakeFetch({
+    RenewToken: { data: { renewToken: { authToken: fresh, refreshToken: 'r2' } } },
+    UserSites: { data: { userSites: [{ reference: 'S1' }] } },
+  });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(1000), refreshToken: 'r1' } });
+  const sites = await api.userSites();
+  assert.deepEqual(fetch.calls.map((c) => c.op), ['RenewToken', 'UserSites']);
+  assert.equal(fetch.calls[1].auth, `Bearer ${fresh}`);
+  assert.equal(sites[0].reference, 'S1');
+  assert.equal(api.tokens.refreshToken, 'r2');
+});
+
+test('auth error on query triggers one renewal and retry', async () => {
+  let first = true;
+  const fetch = fakeFetch({
+    RenewToken: { data: { renewToken: { authToken: jwt(9999999999), refreshToken: 'r2' } } },
+    MonthSummary: () => {
+      if (first) { first = false; return { errors: [{ message: 'user-error:auth-required' }] }; }
+      return { data: { monthSummary: { expectedCosts: 120.5 } } };
+    },
+  });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(9999999999), refreshToken: 'r1' } });
+  const ms = await api.monthSummary('S1');
+  assert.equal(ms.expectedCosts, 120.5);
+  assert.deepEqual(fetch.calls.map((c) => c.op), ['MonthSummary', 'RenewToken', 'MonthSummary']);
+});
+
+test('failed renewal surfaces as auth error', async () => {
+  const fetch = fakeFetch({ RenewToken: { errors: [{ message: 'user-error:auth-not-authorised' }] } });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(1000), refreshToken: 'r1' } });
+  await assert.rejects(api.invoices('S1'), (e) => e instanceof FrankEnergieAuthError);
+});
+
+test('ignorable "no data" errors do not throw', async () => {
+  const fetch = fakeFetch({ MarketPrices: { data: { marketPrices: null }, errors: [{ message: 'No marketprices found for segment ELECTRICITY' }] } });
+  const api = new FrankEnergieApi({ fetch });
+  const p = await api.marketPrices('2026-10-21');
+  assert.deepEqual(p.electricity, []);
+});

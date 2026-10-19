@@ -9,7 +9,7 @@ Port van de [Home Assistant Frank Energie-integratie](https://github.com/HiDiHo0
 | Fase | Inhoud | Status |
 |---|---|---|
 | 1 | Dynamische prijzen (geen account nodig) | ✅ v0.1.0 |
-| 2 | Frank-account: eigen prijzen, kosten, verbruik, facturen | gepland |
+| 2 | Frank-account: eigen prijzen, kosten, verbruik, facturen | ✅ v0.2.0 |
 | 3 | Smart Trading (thuisaccu), Slim Laden (Enode), PV / slim terugleveren | gepland |
 
 ## Apparaat: Dynamische prijzen
@@ -23,6 +23,19 @@ Instellingen: soort prijs (all-in, markt+, marktprijs), resolutie (kwartier of u
 **Condities:** prijs onder/boven een waarde · nu een van de N goedkoopste of duurste uren · onder/boven het daggemiddelde · nu in het goedkoopste blok van N uur.
 
 **Actie:** prijzen verversen.
+
+De triggers, condities en de actie werken voor beide apparaten.
+
+## Apparaat: Frank-account
+
+Inloggen met je Frank Energie e-mailadres en wachtwoord. Het wachtwoord wordt niet bewaard: de app bewaart alleen de tokens van Frank en vernieuwt die automatisch. Is de login verlopen, dan wordt het apparaat onbeschikbaar en log je opnieuw in via **Repareren**.
+
+Per leveringsadres één apparaat, met:
+
+- je **eigen klantprijzen** (dezelfde waarden als het prijzenapparaat, maar met jouw inkoopvergoeding en contractresolutie)
+- **kosten deze maand** tot de laatste meterstand, verwachte kosten tot nu en voor de hele maand, datum laatste meterstand
+- **verbruik en kosten gisteren** voor stroom, teruglevering en gas
+- bedrag van de **vorige en huidige factuur**
 
 ## Ontwikkelen
 

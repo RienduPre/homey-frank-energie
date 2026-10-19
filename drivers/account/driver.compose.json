@@ -1,0 +1,186 @@
+{
+  "name": {
+    "en": "Frank account",
+    "nl": "Frank-account"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "frank_price_now",
+    "frank_price_next",
+    "frank_price_min_today",
+    "frank_time_min_today",
+    "frank_price_max_today",
+    "frank_time_max_today",
+    "frank_price_avg_today",
+    "frank_cheapest_block",
+    "frank_price_avg_tomorrow",
+    "frank_gas_price_now",
+    "frank_costs_month",
+    "frank_costs_month_expected",
+    "frank_costs_month_forecast",
+    "frank_last_reading",
+    "frank_usage_elec_yesterday",
+    "frank_costs_elec_yesterday",
+    "frank_usage_feedin_yesterday",
+    "frank_costs_feedin_yesterday",
+    "frank_usage_gas_yesterday",
+    "frank_costs_gas_yesterday",
+    "frank_invoice_previous",
+    "frank_invoice_current"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "usernameLabel": {
+          "en": "E-mail address",
+          "nl": "E-mailadres"
+        },
+        "usernamePlaceholder": {
+          "en": "you@example.com",
+          "nl": "jij@voorbeeld.nl"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        },
+        "passwordPlaceholder": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        }
+      },
+      "navigation": {
+        "next": "list_devices"
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "usernameLabel": {
+          "en": "E-mail address",
+          "nl": "E-mailadres"
+        },
+        "passwordLabel": {
+          "en": "Password",
+          "nl": "Wachtwoord"
+        }
+      }
+    }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "Prices",
+        "nl": "Prijzen"
+      },
+      "children": [
+        {
+          "id": "price_type",
+          "type": "dropdown",
+          "value": "allInPrice",
+          "label": {
+            "en": "Price type",
+            "nl": "Soort prijs"
+          },
+          "hint": {
+            "en": "Your own customer prices. All-in includes energy tax, VAT and your purchasing fee.",
+            "nl": "Je eigen klantprijzen. All-in is inclusief energiebelasting, btw en je inkoopvergoeding."
+          },
+          "values": [
+            {
+              "id": "allInPrice",
+              "label": {
+                "en": "All-in",
+                "nl": "All-in"
+              }
+            },
+            {
+              "id": "marketPricePlus",
+              "label": {
+                "en": "Market+ (excl. energy tax)",
+                "nl": "Markt+ (excl. energiebelasting)"
+              }
+            },
+            {
+              "id": "marketPrice",
+              "label": {
+                "en": "Market price (excl. VAT)",
+                "nl": "Marktprijs (excl. btw)"
+              }
+            }
+          ]
+        },
+        {
+          "id": "block_hours",
+          "type": "number",
+          "value": 2,
+          "min": 0.25,
+          "max": 12,
+          "step": 0.25,
+          "units": {
+            "en": "h",
+            "nl": "u"
+          },
+          "label": {
+            "en": "Cheapest block length",
+            "nl": "Lengte goedkoopste blok"
+          }
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Connection",
+        "nl": "Aansluiting"
+      },
+      "children": [
+        {
+          "id": "site_reference",
+          "type": "label",
+          "value": "",
+          "label": {
+            "en": "Site reference",
+            "nl": "Aansluitingsnummer"
+          }
+        },
+        {
+          "id": "address",
+          "type": "label",
+          "value": "",
+          "label": {
+            "en": "Address",
+            "nl": "Adres"
+          }
+        }
+      ]
+    }
+  ]
+}
