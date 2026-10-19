@@ -10,7 +10,7 @@ Port van de [Home Assistant Frank Energie-integratie](https://github.com/HiDiHo0
 |---|---|---|
 | 1 | Dynamische prijzen (geen account nodig) | ✅ v0.1.0 |
 | 2 | Frank-account: eigen prijzen, kosten, verbruik, facturen | ✅ v0.2.0 |
-| 3 | Smart Trading (thuisaccu), Slim Laden (Enode), PV / slim terugleveren | gepland |
+| 3 | Thuisbatterij (Smart Trading), Slim Laden (auto/laadpaal), zonnepanelen (slim terugleveren) | ✅ v0.3.0 |
 
 ## Apparaat: Dynamische prijzen
 
@@ -28,7 +28,7 @@ De triggers, condities en de actie werken voor beide apparaten.
 
 ## Apparaat: Frank-account
 
-Inloggen met je Frank Energie e-mailadres en wachtwoord. Het wachtwoord wordt niet bewaard: de app bewaart alleen de tokens van Frank en vernieuwt die automatisch. Is de login verlopen, dan wordt het apparaat onbeschikbaar en log je opnieuw in via **Repareren**.
+Inloggen met je Frank Energie e-mailadres en wachtwoord. Het wachtwoord wordt niet bewaard: de app bewaart alleen de tokens van Frank en vernieuwt die automatisch. Alle accountapparaten (adres, thuisbatterij, auto/laadpaal, zonnepanelen) delen één login: ben je al ingelogd, dan slaat het toevoegen van een volgend apparaat het inlogscherm over. Is de login verlopen, dan worden de apparaten onbeschikbaar; **Repareren** bij één apparaat maakt ze allemaal weer actief.
 
 Per leveringsadres één apparaat, met:
 
@@ -37,16 +37,32 @@ Per leveringsadres één apparaat, met:
 - **verbruik en kosten gisteren** voor stroom, teruglevering en gas
 - bedrag van de **vorige en huidige factuur**
 
+## Apparaat: Thuisbatterij (Smart Trading)
+
+Per batterij: laadniveau, status, batterijmodus, handelsresultaat vandaag, gisteren, deze maand en totaal, tijdstip laatste update. Wordt elk kwartier ververst.
+
+## Apparaat: Auto of laadpaal (Slim Laden)
+
+Per auto of laadpaal die via Frank Slim Laden (Enode) gekoppeld is: slim laden aan/uit (schakelbaar), accuniveau, aan het laden, aangesloten, laadvermogen, actieradius, laadlimiet en resterende laadtijd. Wordt elke 5 minuten ververst.
+
+**Triggers:** begon/stopte met laden · aangesloten/losgekoppeld. **Condities:** is aan het laden · is aangesloten · slim laden staat aan. **Actie:** zet slim laden aan/uit.
+
+## Apparaat: Zonnepanelen (slim terugleveren)
+
+Per installatie: status, sturingsstatus, totaal resultaat, totale bonus en of slim terugleveren actief is.
+
 ## Ontwikkelen
 
 ```bash
-npm install -g homey
-homey login
-npm run images      # genereert de PNG-afbeeldingen (eenmalig)
-homey app run        # draait de app op je eigen Homey
-npm test             # unit tests prijslogica
-homey app validate --level verified
+npm install
+npx homey login
+npm run images                  # genereert de PNG-afbeeldingen (na elke update)
+npx homey app run --remote      # draait de app op je Homey (zonder Docker)
+npm test                        # unit tests prijslogica en API-client
+npx homey app validate --level verified
 ```
+
+Loopt `git pull` vast op `app.json`, typ dan eerst `git checkout -- app.json` (Homey herschrijft dat bestand bij het starten).
 
 ## Licentie
 

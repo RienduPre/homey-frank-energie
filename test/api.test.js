@@ -86,3 +86,29 @@ test('ignorable "no data" errors do not throw', async () => {
   const p = await api.marketPrices('2026-10-21');
   assert.deepEqual(p.electricity, []);
 });
+
+test('feature not enabled gives an empty list', async () => {
+  const fetch = fakeFetch({ SmartBatteries: { errors: [{ message: 'user-error:smart-trading-not-enabled' }] } });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(9999999999), refreshToken: 'r1' } });
+  assert.deepEqual(await api.smartBatteries(), []);
+});
+
+test('smart charging update sends all charge settings', async () => {
+  const fetch = fakeFetch({ EnodeUpdateVehicleChargeSettings: { data: { enodeUpdateVehicleChargeSettings: true } } });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(9999999999), refreshToken: 'r1' } });
+  const settings = {
+    id: 'cs1', deadline: null, isSmartChargingEnabled: false, isSolarChargingEnabled: false,
+    minChargeLimit: 20, maxChargeLimit: 80, calculatedDeadline: '2026-10-20T07:00:00Z',
+    hourMonday: 420, hourTuesday: 420, hourWednesday: 420, hourThursday: 420,
+    hourFriday: 420, hourSaturday: 600, hourSunday: 600,
+  };
+  await api.updateChargeSettings('vehicle', settings, { isSmartChargingEnabled: true });
+  const input = fetch.calls[0].vars.input;
+  assert.equal(input.vehicleId, 'cs1');
+  assert.equal(input.isSmartChargingEnabled, true);
+  assert.equal(input.maxChargeLimit, 80);
+  assert.equal(input.hourSaturday, 600);
+  assert.equal(input.calculatedDeadline, undefined); // read-only field not sent
+  assert.equal(input.id, undefined);
+  assert.equal(Object.keys(input).length, 13);
+});

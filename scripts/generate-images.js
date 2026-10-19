@@ -97,6 +97,15 @@ const jobs = [
   ['drivers/account/assets/images/small.png', 75, 75, true],
   ['drivers/account/assets/images/large.png', 500, 500, true],
   ['drivers/account/assets/images/xlarge.png', 1000, 1000, true],
+  ['drivers/battery/assets/images/small.png', 75, 75, true],
+  ['drivers/battery/assets/images/large.png', 500, 500, true],
+  ['drivers/battery/assets/images/xlarge.png', 1000, 1000, true],
+  ['drivers/ev/assets/images/small.png', 75, 75, true],
+  ['drivers/ev/assets/images/large.png', 500, 500, true],
+  ['drivers/ev/assets/images/xlarge.png', 1000, 1000, true],
+  ['drivers/pv/assets/images/small.png', 75, 75, true],
+  ['drivers/pv/assets/images/large.png', 500, 500, true],
+  ['drivers/pv/assets/images/xlarge.png', 1000, 1000, true],
 ];
 for (const [rel, w, h, sq] of jobs) {
   const file = path.join(root, rel);
