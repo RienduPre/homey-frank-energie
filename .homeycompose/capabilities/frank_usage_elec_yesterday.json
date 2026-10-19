@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Electricity usage yesterday", "nl": "Stroomverbruik gisteren"}, "getable": true, "setable": false, "units": {"en": "kWh"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/meter.svg", "insights": true}

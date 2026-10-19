@@ -1,11 +1,11 @@
 {
   "name": "nl.riendupre.frankenergie",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Frank Energie app for Homey Pro",
   "main": "app.js",
   "scripts": {
-    "test": "node --test test/prices.test.js",
+    "test": "node --test test/prices.test.js test/api.test.js",
     "lint": "eslint .",
     "images": "node scripts/generate-images.js"
   },

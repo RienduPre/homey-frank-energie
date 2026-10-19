@@ -1,8 +1,18 @@
 {
   "tomorrow": "tomorrow",
-  "pair": { "device_name": "Frank Energie prices" },
+  "pair": {
+    "device_name": "Frank Energie prices"
+  },
   "warning": {
     "fetch_failed": "Could not reach Frank Energie, showing the last known prices",
     "no_prices": "No prices available yet"
+  },
+  "error": {
+    "not_logged_in": "Please log in first",
+    "no_sites": "No delivery addresses found in this Frank Energie account",
+    "site_not_in_account": "This address does not belong to the account you logged in with",
+    "login_failed": "Login failed: check your e-mail address and password",
+    "connection": "Could not reach Frank Energie",
+    "reauth": "Your Frank Energie login has expired. Use 'Repair' in the device settings to log in again."
   }
 }

@@ -1,0 +1,1 @@
+{"type": "string", "title": {"en": "Last meter reading", "nl": "Laatste meterstand"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/clock.svg"}

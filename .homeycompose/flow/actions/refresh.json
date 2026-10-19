@@ -1,0 +1,1 @@
+{"id": "refresh", "title": {"en": "Refresh prices", "nl": "Prijzen verversen"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=prices|account"}]}

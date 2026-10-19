@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Gas usage yesterday", "nl": "Gasverbruik gisteren"}, "getable": true, "setable": false, "units": {"en": "m³"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/meter.svg", "insights": true}

@@ -1,21 +1,37 @@
 {
   "id": "nl.riendupre.frankenergie",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": ">=12.0.0",
   "sdk": 3,
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "name": {
     "en": "Frank Energie",
     "nl": "Frank Energie"
   },
   "description": {
-    "en": "Dynamic Frank Energie prices as live values, for dashboards, energy management and flows",
-    "nl": "Dynamische prijzen van Frank Energie als live waarden, voor dashboards, energiebeheer en flows"
+    "en": "Frank Energie prices, costs and usage as live values, for dashboards, energy management and flows",
+    "nl": "Prijzen, kosten en verbruik van Frank Energie als live waarden, voor dashboards, energiebeheer en flows"
   },
-  "category": ["energy"],
+  "category": [
+    "energy"
+  ],
   "tags": {
-    "en": ["frank energie", "dynamic prices", "energy", "electricity", "gas"],
-    "nl": ["frank energie", "dynamische tarieven", "energie", "stroom", "gas"]
+    "en": [
+      "frank energie",
+      "dynamic prices",
+      "energy",
+      "electricity",
+      "gas"
+    ],
+    "nl": [
+      "frank energie",
+      "dynamische tarieven",
+      "energie",
+      "stroom",
+      "gas"
+    ]
   },
   "permissions": [],
   "brandColor": "#1A3C34",
@@ -30,11 +46,15 @@
   },
   "contributors": {
     "developers": [
-      { "name": "HiDiHo01 (Home Assistant integration, MIT)" }
+      {
+        "name": "HiDiHo01 (Home Assistant integration, MIT)"
+      }
     ]
   },
   "homepage": "https://smart-energy-management.nl",
   "support": "https://github.com/RienduPre/homey-frank-energie/issues",
   "source": "https://github.com/RienduPre/homey-frank-energie",
-  "bugs": { "url": "https://github.com/RienduPre/homey-frank-energie/issues" }
+  "bugs": {
+    "url": "https://github.com/RienduPre/homey-frank-energie/issues"
+  }
 }

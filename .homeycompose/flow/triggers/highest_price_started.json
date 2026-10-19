@@ -1,0 +1,1 @@
+{"id": "highest_price_started", "title": {"en": "Most expensive moment of the day started", "nl": "Duurste moment van de dag is begonnen"}, "tokens": [{"name": "price", "type": "number", "title": {"en": "Price", "nl": "Prijs"}, "example": 0.4321}], "args": [{"type": "device", "name": "device", "filter": "driver_id=prices|account"}]}

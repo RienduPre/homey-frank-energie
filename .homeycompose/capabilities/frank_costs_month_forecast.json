@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Expected costs this month", "nl": "Verwachte kosten hele maand"}, "getable": true, "setable": false, "units": {"en": "€"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": false}

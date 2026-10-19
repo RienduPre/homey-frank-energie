@@ -1,0 +1,1 @@
+{"id": "lowest_price_started", "title": {"en": "Cheapest moment of the day started", "nl": "Goedkoopste moment van de dag is begonnen"}, "tokens": [{"name": "price", "type": "number", "title": {"en": "Price", "nl": "Prijs"}, "example": 0.0987}], "args": [{"type": "device", "name": "device", "filter": "driver_id=prices|account"}]}

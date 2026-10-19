@@ -1,0 +1,1 @@
+{"id": "below_average", "title": {"en": "Electricity price is !{{below|above}} today's average", "nl": "Stroomprijs is !{{onder|boven}} het daggemiddelde"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=prices|account"}]}

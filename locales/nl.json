@@ -1,8 +1,18 @@
 {
   "tomorrow": "morgen",
-  "pair": { "device_name": "Frank Energie prijzen" },
+  "pair": {
+    "device_name": "Frank Energie prijzen"
+  },
   "warning": {
     "fetch_failed": "Frank Energie is niet bereikbaar, de laatst bekende prijzen worden getoond",
     "no_prices": "Nog geen prijzen beschikbaar"
+  },
+  "error": {
+    "not_logged_in": "Log eerst in",
+    "no_sites": "Geen leveringsadressen gevonden in dit Frank Energie-account",
+    "site_not_in_account": "Dit adres hoort niet bij het account waarmee je inlogde",
+    "login_failed": "Inloggen mislukt: controleer je e-mailadres en wachtwoord",
+    "connection": "Frank Energie is niet bereikbaar",
+    "reauth": "Je Frank Energie-login is verlopen. Kies 'Repareren' bij het apparaat om opnieuw in te loggen."
   }
 }

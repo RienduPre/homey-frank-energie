@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Feed-in revenue yesterday", "nl": "Opbrengst teruglevering gisteren"}, "getable": true, "setable": false, "units": {"en": "€"}, "decimals": 2, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": true}
