@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Average price tomorrow", "nl": "Gemiddelde prijs morgen"}, "getable": true, "setable": false, "units": {"en": "€/kWh"}, "decimals": 4, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": false}

@@ -1,0 +1,1 @@
+{"type": "string", "title": {"en": "Cheapest block", "nl": "Goedkoopste blok"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/clock.svg"}

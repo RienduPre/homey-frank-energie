@@ -1,0 +1,78 @@
+{
+  "name": {
+    "en": "Dynamic prices",
+    "nl": "Dynamische prijzen"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "frank_price_now",
+    "frank_price_next",
+    "frank_price_min_today",
+    "frank_time_min_today",
+    "frank_price_max_today",
+    "frank_time_max_today",
+    "frank_price_avg_today",
+    "frank_cheapest_block",
+    "frank_price_avg_tomorrow",
+    "frank_gas_price_now"
+  ],
+  "platforms": ["local"],
+  "connectivity": ["cloud"],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": { "next": "add_devices" }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "settings": [
+    {
+      "id": "price_type",
+      "type": "dropdown",
+      "value": "allInPrice",
+      "label": { "en": "Price type", "nl": "Soort prijs" },
+      "hint": {
+        "en": "All-in includes energy tax, VAT and Frank's purchasing fee. Market+ excludes energy tax.",
+        "nl": "All-in is inclusief energiebelasting, btw en inkoopvergoeding van Frank. Markt+ is zonder energiebelasting."
+      },
+      "values": [
+        { "id": "allInPrice", "label": { "en": "All-in", "nl": "All-in" } },
+        { "id": "marketPricePlus", "label": { "en": "Market+ (excl. energy tax)", "nl": "Markt+ (excl. energiebelasting)" } },
+        { "id": "marketPrice", "label": { "en": "Market price (excl. VAT)", "nl": "Marktprijs (excl. btw)" } }
+      ]
+    },
+    {
+      "id": "resolution",
+      "type": "dropdown",
+      "value": "PT15M",
+      "label": { "en": "Resolution", "nl": "Resolutie" },
+      "values": [
+        { "id": "PT15M", "label": { "en": "Quarter-hour", "nl": "Kwartier" } },
+        { "id": "PT60M", "label": { "en": "Hour", "nl": "Uur" } }
+      ]
+    },
+    {
+      "id": "block_hours",
+      "type": "number",
+      "value": 2,
+      "min": 0.25,
+      "max": 12,
+      "step": 0.25,
+      "units": { "en": "h", "nl": "u" },
+      "label": { "en": "Cheapest block length", "nl": "Lengte goedkoopste blok" },
+      "hint": {
+        "en": "Length of the 'Cheapest block' shown on the device (remaining hours today and tomorrow).",
+        "nl": "Lengte van het 'Goedkoopste blok' op het apparaat (resterende uren vandaag en morgen)."
+      }
+    }
+  ]
+}

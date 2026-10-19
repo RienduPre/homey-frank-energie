@@ -1,0 +1,1 @@
+{"type": "number", "title": {"en": "Lowest price today", "nl": "Laagste prijs vandaag"}, "getable": true, "setable": false, "units": {"en": "€/kWh"}, "decimals": 4, "uiComponent": "sensor", "icon": "/assets/price.svg", "insights": false}
