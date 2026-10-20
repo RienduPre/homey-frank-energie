@@ -1,0 +1,1 @@
+{"id": "ev_set_deadline", "title": {"en": "Charge ready by…", "nl": "Klaar met laden om…"}, "titleFormatted": {"en": "Charge ready by [[time]]", "nl": "Klaar met laden om [[time]]"}, "args": [{"type": "device", "name": "device", "filter": "driver_id=ev"}, {"type": "time", "name": "time", "title": {"en": "Time", "nl": "Tijd"}}]}

@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Smart heat pump", "nl": "Slimme warmtepomp"}, "getable": true, "setable": false, "uiComponent": "sensor", "icon": "/assets/meter.svg", "insights": false}

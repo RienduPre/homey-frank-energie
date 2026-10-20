@@ -1,0 +1,1 @@
+{"type": "boolean", "title": {"en": "Solar charging", "nl": "Zonneladen"}, "getable": true, "setable": true, "uiComponent": "toggle", "icon": "/assets/sun.svg", "insights": true, "insightsTitleTrue": {"en": "Solar charging on", "nl": "Zonneladen aan"}, "insightsTitleFalse": {"en": "Solar charging off", "nl": "Zonneladen uit"}}
