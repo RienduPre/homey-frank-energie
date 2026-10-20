@@ -30,6 +30,7 @@ class FrankEnergieApp extends Homey.App {
 
     this.registerPriceCards();
     this.registerEvCards();
+    this.registerBatteryCards();
     this.log('Frank Energie app started');
   }
 
@@ -112,6 +113,23 @@ class FrankEnergieApp extends Homey.App {
       .registerRunListener(async ({ device }) => device.getCapabilityValue('frank_smart_charging') === true);
     this.homey.flow.getActionCard('ev_set_smart_charging')
       .registerRunListener(async ({ device, state }) => device.setSmartCharging(state === 'on'));
+    this.homey.flow.getActionCard('ev_set_solar_charging')
+      .registerRunListener(async ({ device, state }) => device.setSolarCharging(state === 'on'));
+    this.homey.flow.getActionCard('ev_set_max_charge_limit')
+      .registerRunListener(async ({ device, percent }) => device.setChargeLimit('max', percent));
+    this.homey.flow.getActionCard('ev_set_min_charge_limit')
+      .registerRunListener(async ({ device, percent }) => device.setChargeLimit('min', percent));
+    this.homey.flow.getActionCard('ev_set_deadline')
+      .registerRunListener(async ({ device, time }) => device.setDeadline(time));
+  }
+
+  // ---------------------------------------------------------- battery cards
+
+  registerBatteryCards() {
+    this.homey.flow.getActionCard('battery_set_mode')
+      .registerRunListener(async ({ device, mode }) => device.updateSettings({ batteryMode: mode }));
+    this.homey.flow.getActionCard('battery_set_strategy')
+      .registerRunListener(async ({ device, strategy }) => device.updateSettings({ imbalanceTradingStrategy: strategy }));
   }
 
   /**

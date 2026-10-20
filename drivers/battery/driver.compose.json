@@ -8,6 +8,7 @@
     "measure_battery",
     "frank_battery_status",
     "frank_battery_mode",
+    "frank_battery_strategy",
     "frank_trading_result_today",
     "frank_trading_result_yesterday",
     "frank_trading_result_month",

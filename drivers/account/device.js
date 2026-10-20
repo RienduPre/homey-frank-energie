@@ -3,6 +3,7 @@
 const PriceDevice = require('../../lib/PriceDevice');
 const { FrankEnergieAuthError } = require('../../lib/FrankEnergieApi');
 const P = require('../../lib/prices');
+const { syncCapabilities } = require('../../lib/FrankDevice');
 
 const ACCOUNT_REFRESH_MS = 60 * 60 * 1000; // account data changes at most daily
 
@@ -13,6 +14,7 @@ class AccountDevice extends PriceDevice {
 
   async onInit() {
     this.authFailed = false;
+    await syncCapabilities(this);
     await super.onInit();
     await this.refreshAccount().catch((err) => this.error('Account refresh failed:', err.message));
     this.accountTimer = this.homey.setInterval(
@@ -78,6 +80,7 @@ class AccountDevice extends PriceDevice {
       this.api.monthSummary(ref),
       this.api.periodUsageAndCosts(ref, yesterday),
       this.api.invoices(ref),
+      this.api.smartHvacStatus(),
     ]);
 
     const authErr = results.find((r) => r.status === 'rejected' && r.reason instanceof FrankEnergieAuthError);
@@ -86,9 +89,9 @@ class AccountDevice extends PriceDevice {
       return;
     }
 
-    const [summary, usage, invoices] = results.map((r) => (r.status === 'fulfilled' ? r.value : undefined));
+    const [summary, usage, invoices, hvac] = results.map((r) => (r.status === 'fulfilled' ? r.value : undefined));
     results.forEach((r, i) => {
-      const name = ['monthSummary', 'periodUsageAndCosts', 'invoices'][i];
+      const name = ['monthSummary', 'periodUsageAndCosts', 'invoices', 'smartHvac'][i];
       if (r.status === 'rejected') this.log(name, 'failed:', r.reason.message);
       else if (!r.value) this.log(name, 'returned no data for', ref);
     });
@@ -109,6 +112,8 @@ class AccountDevice extends PriceDevice {
       await set('frank_usage_gas_yesterday', part(usage.gas, 'usageTotal'));
       await set('frank_costs_gas_yesterday', part(usage.gas, 'costsTotal'));
     }
+
+    if (hvac) await set('frank_smart_hvac', hvac.isActivated === true);
 
     if (invoices) {
       await set('frank_invoice_previous', money(invoices.previousPeriodInvoice && invoices.previousPeriodInvoice.totalAmount));

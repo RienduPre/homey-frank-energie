@@ -112,3 +112,26 @@ test('smart charging update sends all charge settings', async () => {
   assert.equal(input.id, undefined);
   assert.equal(Object.keys(input).length, 13);
 });
+
+test('Belgian prices use the x-country header and the reduced query', async () => {
+  let headers = null;
+  let query = '';
+  const fetch = async (url, opts) => {
+    headers = opts.headers;
+    query = JSON.parse(opts.body).query;
+    return { ok: true, status: 200, json: async () => ({ data: { marketPrices: { electricityPrices: [{ marketPrice: 0.1 }], gasPrices: [] } } }) };
+  };
+  const api = new FrankEnergieApi({ fetch });
+  const p = await api.marketPrices('2026-10-21', 'PT15M', 'BE');
+  assert.equal(headers['x-country'], 'BE');
+  assert.equal(query.includes('allInPrice'), false);
+  assert.equal(p.electricity.length, 1);
+});
+
+test('battery settings mutation sends device id and settings', async () => {
+  const fetch = fakeFetch({ SmartBatteryUpdateSettings: { data: { smartBatteryUpdateSettings: { batteryMode: 'TRADING' } } } });
+  const api = new FrankEnergieApi({ fetch, tokens: { authToken: jwt(9999999999), refreshToken: 'r1' } });
+  const r = await api.updateBatterySettings('bat1', { batteryMode: 'TRADING' });
+  assert.equal(r.batteryMode, 'TRADING');
+  assert.deepEqual(fetch.calls[0].vars, { deviceId: 'bat1', settings: { batteryMode: 'TRADING' } });
+});

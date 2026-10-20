@@ -39,6 +39,7 @@ class BatteryDevice extends FrankDevice {
     await this.set('measure_battery', soc === null || unreliable ? null : Math.max(0, Math.min(100, Math.round(soc))));
     await this.set('frank_battery_status', this.statusLabel(status));
     await this.set('frank_battery_mode', this.statusLabel(settings.batteryMode));
+    await this.set('frank_battery_strategy', this.statusLabel(settings.imbalanceTradingStrategy));
     await this.set('frank_trading_result_total', money(summary.totalResult));
     await this.set('frank_battery_last_update', summary.lastUpdate ? P.localTime(new Date(summary.lastUpdate), this.tz) : null);
 
@@ -52,6 +53,22 @@ class BatteryDevice extends FrankDevice {
       await this.set('frank_trading_result_yesterday', sumFor(yesterday));
       await this.set('frank_trading_result_month', money(sessions.periodTotalResult));
     }
+  }
+
+  /**
+   * Change the battery mode or trading strategy (flow actions).
+   *
+   * @param {{batteryMode?: string, imbalanceTradingStrategy?: string}} settings
+   */
+  async updateSettings(settings) {
+    try {
+      await this.api.updateBatterySettings(this.getData().id, settings);
+    } catch (err) {
+      this.error('Battery settings update failed:', err.message);
+      await this.handleError(err);
+      throw new Error(this.homey.__('error.battery_settings_failed'));
+    }
+    await this.update();
   }
 
 }
