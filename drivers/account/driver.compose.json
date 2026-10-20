@@ -26,7 +26,8 @@
     "frank_usage_gas_yesterday",
     "frank_costs_gas_yesterday",
     "frank_invoice_previous",
-    "frank_invoice_current"
+    "frank_invoice_current",
+    "frank_smart_hvac"
   ],
   "platforms": [
     "local"
