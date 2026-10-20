@@ -6,12 +6,16 @@
   "class": "sensor",
   "capabilities": [
     "frank_smart_charging",
+    "frank_solar_charging",
     "measure_battery",
     "frank_ev_charging",
     "frank_ev_plugged_in",
     "measure_power",
     "frank_ev_range",
     "frank_ev_charge_limit",
+    "frank_ev_max_charge_limit",
+    "frank_ev_min_charge_limit",
+    "frank_ev_ready_by",
     "frank_ev_time_remaining"
   ],
   "platforms": [
