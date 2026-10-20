@@ -11,12 +11,13 @@ Port van de [Home Assistant Frank Energie-integratie](https://github.com/HiDiHo0
 | 1 | Dynamische prijzen (geen account nodig) | ✅ v0.1.0 |
 | 2 | Frank-account: eigen prijzen, kosten, verbruik, facturen | ✅ v0.2.0 |
 | 3 | Thuisbatterij (Smart Trading), Slim Laden (auto/laadpaal), zonnepanelen (slim terugleveren) | ✅ v0.3.0 |
+| 4 | Laadinstellingen, batterijmodus en -strategie, slimme warmtepomp, Belgische prijzen | ✅ v0.4.0 |
 
 ## Apparaat: Dynamische prijzen
 
 Waarden: stroomprijs nu en volgende, laagste/hoogste/gemiddelde prijs vandaag (met tijdstip), gemiddelde morgen, goedkoopste blok (instelbare lengte) en gasprijs nu.
 
-Instellingen: soort prijs (all-in, markt+, marktprijs), resolutie (kwartier of uur), lengte goedkoopste blok.
+Instellingen: land (Nederland of België), soort prijs (all-in, markt+, marktprijs), resolutie (kwartier of uur), lengte goedkoopste blok. Voor België levert Frank geen all-in prijs; de app telt btw, inkoopvergoeding en energiebelasting dan zelf op.
 
 **Triggers:** stroomprijs veranderd · zakt onder / stijgt boven een prijs · goedkoopste of duurste moment van de dag begonnen · goedkoopste blok van N uur begonnen · prijzen voor morgen bekend.
 
@@ -36,16 +37,21 @@ Per leveringsadres één apparaat, met:
 - **kosten deze maand** tot de laatste meterstand, verwachte kosten tot nu en voor de hele maand, datum laatste meterstand
 - **verbruik en kosten gisteren** voor stroom, teruglevering en gas
 - bedrag van de **vorige en huidige factuur**
+- of de **slimme warmtepomp** (Smart HVAC) van Frank actief is
 
 ## Apparaat: Thuisbatterij (Smart Trading)
 
-Per batterij: laadniveau, status, batterijmodus, handelsresultaat vandaag, gisteren, deze maand en totaal, tijdstip laatste update. Wordt elk kwartier ververst.
+Per batterij: laadniveau, status, batterijmodus, handelsstrategie, handelsresultaat vandaag, gisteren, deze maand en totaal, tijdstip laatste update. Wordt elk kwartier ververst.
+
+**Acties:** zet batterijmodus op Zelfconsumptie Plus of Handelen · zet handelsstrategie (standaard, gebalanceerd, conservatief, agressief, alleen onbalans).
 
 ## Apparaat: Auto of laadpaal (Slim Laden)
 
-Per auto of laadpaal die via Frank Slim Laden (Enode) gekoppeld is: slim laden aan/uit (schakelbaar), accuniveau, aan het laden, aangesloten, laadvermogen, actieradius, laadlimiet en resterende laadtijd. Wordt elke 5 minuten ververst.
+Per auto of laadpaal die via Frank Slim Laden (Enode) gekoppeld is: slim laden en zonneladen aan/uit (schakelbaar), accuniveau, aan het laden, aangesloten, laadvermogen, actieradius, laadlimiet van de auto, minimale en maximale laadlimiet bij Frank, klaar-om-tijd en resterende laadtijd. Wordt elke 5 minuten ververst.
 
-**Triggers:** begon/stopte met laden · aangesloten/losgekoppeld. **Condities:** is aan het laden · is aangesloten · slim laden staat aan. **Actie:** zet slim laden aan/uit.
+**Triggers:** begon/stopte met laden · aangesloten/losgekoppeld. **Condities:** is aan het laden · is aangesloten · slim laden staat aan. **Acties:** zet slim laden aan/uit · zet zonneladen aan/uit · stel maximale (50–100%) of minimale laadlimiet in · klaar met laden om (tijd).
+
+Het weekschema met vaste vertrektijden per dag pas je aan in de Frank-app.
 
 ## Apparaat: Zonnepanelen (slim terugleveren)
 

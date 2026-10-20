@@ -20,7 +20,13 @@
     "smart_charging_failed": "Changing smart charging failed",
     "no_batteries": "No home battery with Smart Trading found in your Frank account",
     "no_ev": "No car or charger with Smart Charging found in your Frank account",
-    "no_pv": "No solar installation with smart feed-in found in your Frank account"
+    "no_pv": "No solar installation with smart feed-in found in your Frank account",
+    "battery_settings_failed": "Changing the battery setting failed",
+    "charge_settings_failed": "Changing the charge setting failed",
+    "max_limit_range": "Maximum charge limit must be between 50 and 100%",
+    "min_limit_range": "Minimum charge limit must be between 0 and 100%",
+    "min_above_max": "Minimum charge limit cannot be above the maximum",
+    "invalid_time": "Invalid time, use HH:MM"
   },
   "status": {
     "status_charging": "Charging",
@@ -68,7 +74,12 @@
     "active": "Active",
     "inactive": "Inactive",
     "steering": "Steering",
-    "no_steering": "No steering"
+    "no_steering": "No steering",
+    "balanced": "Balanced",
+    "conservative": "Conservative",
+    "imbalance_only": "Imbalance only",
+    "aggressive": "Aggressive",
+    "standard": "Standard"
   },
   "ev": {
     "vehicle": "car",

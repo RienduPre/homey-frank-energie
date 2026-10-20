@@ -20,7 +20,13 @@
     "smart_charging_failed": "Slim laden aanpassen mislukt",
     "no_batteries": "Geen thuisbatterij met Smart Trading gevonden in je Frank-account",
     "no_ev": "Geen auto of laadpaal met Slim Laden gevonden in je Frank-account",
-    "no_pv": "Geen zonnepanelen met slim terugleveren gevonden in je Frank-account"
+    "no_pv": "Geen zonnepanelen met slim terugleveren gevonden in je Frank-account",
+    "battery_settings_failed": "Batterij-instelling aanpassen mislukt",
+    "charge_settings_failed": "Laadinstelling aanpassen mislukt",
+    "max_limit_range": "Maximale laadlimiet moet tussen 50 en 100% liggen",
+    "min_limit_range": "Minimale laadlimiet moet tussen 0 en 100% liggen",
+    "min_above_max": "Minimale laadlimiet mag niet hoger zijn dan de maximale",
+    "invalid_time": "Ongeldige tijd, gebruik UU:MM"
   },
   "status": {
     "status_charging": "Aan het laden",
@@ -68,7 +74,12 @@
     "active": "Actief",
     "inactive": "Inactief",
     "steering": "Sturend",
-    "no_steering": "Niet sturend"
+    "no_steering": "Niet sturend",
+    "balanced": "Gebalanceerd",
+    "conservative": "Conservatief",
+    "imbalance_only": "Alleen onbalans",
+    "aggressive": "Agressief",
+    "standard": "Standaard"
   },
   "ev": {
     "vehicle": "auto",
