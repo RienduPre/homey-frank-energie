@@ -13,6 +13,12 @@ const TRIGGERS = [
 /** Drivers whose devices use the Frank account login. */
 const ACCOUNT_DRIVERS = ['account', 'battery', 'ev', 'pv'];
 
+/** Drivers whose devices track prices (and can feed the dashboard widgets). */
+const PRICE_DRIVERS = ['prices', 'account'];
+
+/** Dashboard widgets; each has a `device` autocomplete setting. */
+const WIDGETS = ['price_now', 'price_forecast', 'price_chart'];
+
 /**
  * Price flow cards are app-wide and work for both the "Dynamic prices"
  * and the "Frank account" devices (device argument filter in the card).
@@ -31,6 +37,7 @@ class FrankEnergieApp extends Homey.App {
     this.registerPriceCards();
     this.registerEvCards();
     this.registerBatteryCards();
+    this.registerWidgets();
     this.log('Frank Energie app started');
   }
 
@@ -64,6 +71,55 @@ class FrankEnergieApp extends Homey.App {
       }
     }
     return devices;
+  }
+
+  // ---------------------------------------------------------------- widgets
+
+  priceDevices() {
+    const devices = [];
+    for (const id of PRICE_DRIVERS) {
+      try {
+        devices.push(...this.homey.drivers.getDriver(id).getDevices());
+      } catch (err) {
+        // driver not ready yet
+      }
+    }
+    return devices.filter((d) => typeof d.widgetData === 'function');
+  }
+
+  registerWidgets() {
+    for (const id of WIDGETS) {
+      try {
+        this.homey.dashboards.getWidget(id)
+          .registerSettingAutocompleteListener('device', async (query) => {
+            const q = String(query || '').toLowerCase();
+            return this.priceDevices()
+              .map((d) => ({
+                name: d.getName(),
+                description: this.homey.__(`widget.source_${d.driver.id}`),
+                key: d.widgetKey,
+              }))
+              .filter((item) => item.name.toLowerCase().includes(q));
+          });
+      } catch (err) {
+        this.error(`Widget ${id} not available:`, err.message);
+      }
+    }
+  }
+
+  /**
+   * Payload for a dashboard widget. `key` is the device picked in the widget's
+   * settings; without it (or when it is gone) the first price device is used.
+   */
+  getWidgetData(key) {
+    const devices = this.priceDevices();
+    if (!devices.length) {
+      const err = new Error(this.homey.__('widget.no_device'));
+      err.code = 'no_device';
+      throw err;
+    }
+    const device = (key && devices.find((d) => d.widgetKey === key)) || devices[0];
+    return device.widgetData();
   }
 
   // ------------------------------------------------------------ price cards
