@@ -1,0 +1,168 @@
+/*
+ * Shared styles for the Frank Energie dashboard widgets.
+ * Source: widgets-src/frank.css, copied into each widget by `npm run widgets`.
+ * Built on Homey's widget variables, so light and dark mode follow the dashboard.
+ */
+
+:root {
+  /* Price level colors: the same in light and dark mode. */
+  --fe-l0: #2e9e4f; /* very cheap */
+  --fe-l1: #8cc152; /* cheap */
+  --fe-l2: #f2c12e; /* normal */
+  --fe-l3: #f08a2c; /* expensive */
+  --fe-l4: #e4473c; /* very expensive */
+  --fe-best: #2e9e4f;
+  --fe-peak: #e4473c;
+  --fe-now: var(--homey-color-blue, #1a73e8);
+  --fe-muted: var(--homey-text-color-light, #8a8a8a);
+  --fe-track: var(--homey-line-color-light, rgba(128, 128, 128, 0.18));
+  --fe-line: var(--homey-line-color, rgba(128, 128, 128, 0.35));
+  --fe-tint: rgba(128, 128, 128, 0.08);
+  --fe-best-tint: rgba(46, 158, 79, 0.12);
+  --fe-peak-tint: rgba(228, 71, 60, 0.12);
+  --fe-now-tint: rgba(26, 115, 232, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body { overflow: hidden; }
+
+.fe-hidden { display: none !important; }
+
+.fe-row { display: flex; align-items: center; }
+.fe-grow { flex: 1 1 auto; min-width: 0; }
+.fe-muted { color: var(--fe-muted); }
+.fe-nowrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fe-num { font-variant-numeric: tabular-nums; }
+
+/* Text sizes as Homey pairs them */
+.fe-xxl {
+  font-size: var(--homey-font-size-xxlarge, 32px);
+  line-height: var(--homey-line-height-xxlarge, 40px);
+  font-weight: var(--homey-font-weight-bold, 700);
+}
+.fe-xl {
+  font-size: var(--homey-font-size-xlarge, 24px);
+  line-height: var(--homey-line-height-xlarge, 32px);
+  font-weight: var(--homey-font-weight-bold, 700);
+}
+.fe-l {
+  font-size: var(--homey-font-size-large, 20px);
+  line-height: var(--homey-line-height-large, 28px);
+  font-weight: var(--homey-font-weight-medium, 500);
+}
+.fe-m {
+  font-size: var(--homey-font-size-default, 17px);
+  line-height: var(--homey-line-height-default, 24px);
+}
+.fe-s {
+  font-size: var(--homey-font-size-small, 14px);
+  line-height: var(--homey-line-height-small, 20px);
+  font-weight: var(--homey-font-weight-regular, 400);
+}
+.fe-xs { font-size: 12px; line-height: 16px; }
+.fe-medium { font-weight: var(--homey-font-weight-medium, 500); }
+.fe-bold { font-weight: var(--homey-font-weight-bold, 700); }
+
+/* Level dot and colors */
+.fe-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: 1px;
+  flex: none;
+}
+.fe-c0 { color: var(--fe-l0); } .fe-bg0 { background: var(--fe-l0); }
+.fe-c1 { color: var(--fe-l1); } .fe-bg1 { background: var(--fe-l1); }
+.fe-c2 { color: var(--fe-l2); } .fe-bg2 { background: var(--fe-l2); }
+.fe-c3 { color: var(--fe-l3); } .fe-bg3 { background: var(--fe-l3); }
+.fe-c4 { color: var(--fe-l4); } .fe-bg4 { background: var(--fe-l4); }
+.fe-good { color: var(--fe-best); }
+.fe-bad { color: var(--fe-peak); }
+
+/* Chips */
+.fe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--fe-tint);
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.fe-chip.best { background: var(--fe-best-tint); color: var(--fe-best); }
+.fe-chip.peak { background: var(--fe-peak-tint); color: var(--fe-peak); }
+.fe-chip.small { font-size: 11px; line-height: 16px; padding: 0 6px; font-weight: 600; }
+
+/* Verdict box */
+.fe-verdict {
+  border-radius: var(--homey-border-radius-default, 10px);
+  padding: 8px 10px;
+  background: var(--fe-tint);
+  text-align: center;
+}
+.fe-verdict.best { background: var(--fe-best-tint); }
+.fe-verdict.peak { background: var(--fe-peak-tint); }
+
+/* Segmented control */
+.fe-seg {
+  display: flex;
+  background: var(--fe-tint);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+.fe-seg button {
+  flex: 1 1 0;
+  border: 0;
+  background: transparent;
+  color: var(--fe-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 5px 6px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.fe-seg button.on {
+  background: var(--homey-background-color, #fff);
+  color: var(--homey-text-color, #000);
+  font-weight: 600;
+}
+.homey-dark-mode .fe-seg button.on { background: rgba(255, 255, 255, 0.14); }
+
+/* Trend icon */
+.fe-trend { width: 20px; height: 20px; flex: none; color: var(--fe-muted); }
+
+/* Message states */
+.fe-message {
+  padding: 12px 4px;
+  text-align: center;
+  color: var(--fe-muted);
+}
+
+/* Period line under a column */
+.fe-periods {
+  display: flex;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--fe-track);
+}
+.fe-periods i { flex: 1 1 0; }
+.fe-periods i.best { background: var(--fe-best); }
+.fe-periods i.peak { background: var(--fe-peak); }
+
+svg text { font-family: inherit; }

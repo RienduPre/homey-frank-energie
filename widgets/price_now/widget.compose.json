@@ -1,0 +1,109 @@
+{
+  "name": {
+    "en": "Price now",
+    "nl": "Prijs nu"
+  },
+  "settings": [
+    {
+      "id": "device",
+      "type": "autocomplete",
+      "title": {
+        "en": "Prices from",
+        "nl": "Prijzen van"
+      },
+      "hint": {
+        "en": "A 'Dynamic prices' or 'Frank account' device of this app. Empty: the first one.",
+        "nl": "Een apparaat 'Dynamische prijzen' of 'Frank-account' van deze app. Leeg: het eerste."
+      }
+    },
+    {
+      "id": "style",
+      "type": "dropdown",
+      "title": {
+        "en": "Style",
+        "nl": "Weergave"
+      },
+      "value": "gauge",
+      "values": [
+        {
+          "id": "gauge",
+          "title": {
+            "en": "Gauge",
+            "nl": "Meter"
+          }
+        },
+        {
+          "id": "tile",
+          "title": {
+            "en": "Tile",
+            "nl": "Tegel"
+          }
+        },
+        {
+          "id": "clock",
+          "title": {
+            "en": "Clock (next 12 hours)",
+            "nl": "Klok (komende 12 uur)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "energy",
+      "type": "dropdown",
+      "title": {
+        "en": "Energy",
+        "nl": "Energie"
+      },
+      "value": "electricity",
+      "values": [
+        {
+          "id": "electricity",
+          "title": {
+            "en": "Electricity",
+            "nl": "Stroom"
+          }
+        },
+        {
+          "id": "gas",
+          "title": {
+            "en": "Gas",
+            "nl": "Gas"
+          }
+        }
+      ]
+    },
+    {
+      "id": "unit",
+      "type": "dropdown",
+      "title": {
+        "en": "Unit",
+        "nl": "Eenheid"
+      },
+      "value": "ct",
+      "values": [
+        {
+          "id": "ct",
+          "title": {
+            "en": "Cents (ct/kWh)",
+            "nl": "Cent (ct/kWh)"
+          }
+        },
+        {
+          "id": "eur",
+          "title": {
+            "en": "Euros (€/kWh)",
+            "nl": "Euro (€/kWh)"
+          }
+        }
+      ]
+    }
+  ],
+  "height": 96,
+  "api": {
+    "getData": {
+      "method": "GET",
+      "path": "/"
+    }
+  }
+}

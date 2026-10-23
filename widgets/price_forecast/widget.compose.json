@@ -1,0 +1,88 @@
+{
+  "name": {
+    "en": "Price forecast",
+    "nl": "Prijsverwachting"
+  },
+  "settings": [
+    {
+      "id": "device",
+      "type": "autocomplete",
+      "title": {
+        "en": "Prices from",
+        "nl": "Prijzen van"
+      },
+      "hint": {
+        "en": "A 'Dynamic prices' or 'Frank account' device of this app. Empty: the first one.",
+        "nl": "Een apparaat 'Dynamische prijzen' of 'Frank-account' van deze app. Leeg: het eerste."
+      }
+    },
+    {
+      "id": "show_now",
+      "type": "checkbox",
+      "value": true,
+      "title": {
+        "en": "Show the price now",
+        "nl": "Prijs nu tonen"
+      }
+    },
+    {
+      "id": "show_hours",
+      "type": "checkbox",
+      "value": true,
+      "title": {
+        "en": "Show the coming hours",
+        "nl": "Komende uren tonen"
+      }
+    },
+    {
+      "id": "show_parts",
+      "type": "checkbox",
+      "value": true,
+      "title": {
+        "en": "Show the parts of the day",
+        "nl": "Dagdelen tonen"
+      }
+    },
+    {
+      "id": "show_days",
+      "type": "checkbox",
+      "value": true,
+      "title": {
+        "en": "Show today and tomorrow",
+        "nl": "Vandaag en morgen tonen"
+      }
+    },
+    {
+      "id": "unit",
+      "type": "dropdown",
+      "title": {
+        "en": "Unit",
+        "nl": "Eenheid"
+      },
+      "value": "ct",
+      "values": [
+        {
+          "id": "ct",
+          "title": {
+            "en": "Cents (ct/kWh)",
+            "nl": "Cent (ct/kWh)"
+          }
+        },
+        {
+          "id": "eur",
+          "title": {
+            "en": "Euros (€/kWh)",
+            "nl": "Euro (€/kWh)"
+          }
+        }
+      ]
+    }
+  ],
+  "height": 360,
+  "api": {
+    "getData": {
+      "method": "GET",
+      "path": "/"
+    }
+  }
+}

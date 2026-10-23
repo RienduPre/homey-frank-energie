@@ -1,0 +1,125 @@
+{
+  "name": {
+    "en": "Price chart",
+    "nl": "Prijsgrafiek"
+  },
+  "settings": [
+    {
+      "id": "device",
+      "type": "autocomplete",
+      "title": {
+        "en": "Prices from",
+        "nl": "Prijzen van"
+      },
+      "hint": {
+        "en": "A 'Dynamic prices' or 'Frank account' device of this app. Empty: the first one.",
+        "nl": "Een apparaat 'Dynamische prijzen' of 'Frank-account' van deze app. Leeg: het eerste."
+      }
+    },
+    {
+      "id": "view",
+      "type": "dropdown",
+      "title": {
+        "en": "Opens with",
+        "nl": "Opent met"
+      },
+      "value": "outlook",
+      "values": [
+        {
+          "id": "outlook",
+          "title": {
+            "en": "Outlook (from now)",
+            "nl": "Vooruit (vanaf nu)"
+          }
+        },
+        {
+          "id": "today",
+          "title": {
+            "en": "Today",
+            "nl": "Vandaag"
+          }
+        },
+        {
+          "id": "tomorrow",
+          "title": {
+            "en": "Tomorrow",
+            "nl": "Morgen"
+          }
+        },
+        {
+          "id": "both",
+          "title": {
+            "en": "Today and tomorrow",
+            "nl": "Vandaag en morgen"
+          }
+        }
+      ]
+    },
+    {
+      "id": "resolution",
+      "type": "dropdown",
+      "title": {
+        "en": "Resolution",
+        "nl": "Resolutie"
+      },
+      "value": "15",
+      "values": [
+        {
+          "id": "15",
+          "title": {
+            "en": "15 minutes",
+            "nl": "15 minuten"
+          }
+        },
+        {
+          "id": "60",
+          "title": {
+            "en": "60 minutes",
+            "nl": "60 minuten"
+          }
+        }
+      ]
+    },
+    {
+      "id": "show_controls",
+      "type": "checkbox",
+      "value": true,
+      "title": {
+        "en": "Show view switches",
+        "nl": "Knoppen voor weergave tonen"
+      }
+    },
+    {
+      "id": "unit",
+      "type": "dropdown",
+      "title": {
+        "en": "Unit",
+        "nl": "Eenheid"
+      },
+      "value": "ct",
+      "values": [
+        {
+          "id": "ct",
+          "title": {
+            "en": "Cents (ct/kWh)",
+            "nl": "Cent (ct/kWh)"
+          }
+        },
+        {
+          "id": "eur",
+          "title": {
+            "en": "Euros (€/kWh)",
+            "nl": "Euro (€/kWh)"
+          }
+        }
+      ]
+    }
+  ],
+  "height": 340,
+  "api": {
+    "getData": {
+      "method": "GET",
+      "path": "/"
+    }
+  }
+}
