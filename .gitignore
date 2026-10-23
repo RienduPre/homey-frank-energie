@@ -3,3 +3,6 @@
 /.homeybuild
 /assets/images/*.png
 /drivers/*/assets/images/*.png
+/widgets/*/preview-*.png
+/widgets/*/public/frank.js
+/widgets/*/public/frank.css

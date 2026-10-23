@@ -12,6 +12,7 @@ Port van de [Home Assistant Frank Energie-integratie](https://github.com/HiDiHo0
 | 2 | Frank-account: eigen prijzen, kosten, verbruik, facturen | ✅ v0.2.0 |
 | 3 | Thuisbatterij (Smart Trading), Slim Laden (auto/laadpaal), zonnepanelen (slim terugleveren) | ✅ v0.3.0 |
 | 4 | Laadinstellingen, batterijmodus en -strategie, slimme warmtepomp, Belgische prijzen | ✅ v0.4.0 |
+| 5 | Dashboard-widgets: Prijs nu, Prijsverwachting, Prijsgrafiek | ✅ v0.5.0 |
 
 ## Apparaat: Dynamische prijzen
 
@@ -57,14 +58,33 @@ Het weekschema met vaste vertrektijden per dag pas je aan in de Frank-app.
 
 Per installatie: status, sturingsstatus, totaal resultaat, totale bonus en of slim terugleveren actief is.
 
+## Dashboard-widgets
+
+Drie widgets voor Homey-dashboards, naar voorbeeld van de kaarten van [Tibber Prices](https://github.com/jpawlowski/hass.tibber_prices) voor Home Assistant. Kies ze in een dashboard via **Widget toevoegen → Frank Energie**. Ze tonen de prijzen van een apparaat *Dynamische prijzen* of *Frank-account* (instelling **Prijzen van**; leeg = het eerste) en verversen zichzelf zodra er een nieuw kwartier of nieuwe prijzen zijn.
+
+| Widget | Wat je ziet |
+|---|---|
+| **Prijs nu** | De prijs van nu met niveau en een korte duiding (goedkope of dure periode, wanneer het goedkoop wordt). Drie weergaven: *Meter* (prijs op de schaal van vandaag, met tick voor het daggemiddelde), *Tegel* (één regel tussen andere tegels) en *Klok* (de komende 12 uur rond een wijzerplaat, goedkope en dure periodes als bogen). Kan ook de gasprijs tonen. |
+| **Prijsverwachting** | Als een weerbericht: de prijs nu, de komende uren als staafjes (tik een uur voor de kwartierprijzen), de dagdelen (nacht, ochtend, middag, avond) met gemiddelde en bandbreedte, en vandaag/morgen op één schaal met mediaan, gemiddelde en verschil met vandaag. Groene chips laten zien hoeveel je bespaart door te wachten. Elk onderdeel is aan/uit te zetten. |
+| **Prijsgrafiek** | De prijscurve per kwartier of uur, gekleurd per prijsniveau, met daggemiddelde, laagste en hoogste prijs en balkjes voor goedkope en dure periodes. Schuif met je vinger over de grafiek om prijzen af te lezen. Weergaven: *Vooruit*, *Vandaag*, *Morgen* en *2 dagen*. |
+
+Begrippen (berekend in de app, want Frank levert ze niet zelf):
+
+- **Prijsniveau**: afwijking van het gemiddelde van die dag. Zeer goedkoop ≤ −20 %, goedkoop ≤ −10 %, duur ≥ +10 %, zeer duur ≥ +20 %; negatieve prijzen zijn altijd zeer goedkoop.
+- **Goedkope periode**: aaneengesloten kwartieren (minstens 30 minuten) die goedkoop of zeer goedkoop zijn; één kwartier ertussen mag. Een dag zonder goedkope kwartieren krijgt zijn goedkoopste uur. **Dure periode** werkt net zo met dure kwartieren.
+- **Schommeling**: verschil tussen hoogste en laagste prijs ten opzichte van het gemiddelde.
+
+Widgets vragen Homey 12.3 of nieuwer en werken niet op Homey Cloud.
+
 ## Ontwikkelen
 
 ```bash
 npm install
 npx homey login
-npm run images                  # genereert de PNG-afbeeldingen (na elke update)
+npm run images                  # genereert PNG-afbeeldingen en widget-previews, kopieert de gedeelde widgetcode (na elke update)
 npx homey app run --remote      # draait de app op je Homey (zonder Docker)
-npm test                        # unit tests prijslogica en API-client
+npm test                        # unit tests prijslogica, widgetdata en API-client
+npm run widgets                 # kopieert widgets-src/frank.js en frank.css naar elke widget
 npx homey app validate --level verified
 ```
 

@@ -84,5 +84,69 @@
   "ev": {
     "vehicle": "auto",
     "charger": "laadpaal"
+  },
+  "widget": {
+    "locale": "nl-NL",
+    "decimal_sep": ",",
+    "source_prices": "Dynamische prijzen",
+    "source_account": "Frank-account",
+    "no_device": "Voeg eerst een apparaat 'Dynamische prijzen' of 'Frank-account' toe",
+    "error": "Er ging iets mis bij het tonen van de prijzen",
+    "no_current": "Nog geen prijzen beschikbaar",
+    "no_gas": "Geen gasprijs beschikbaar",
+    "nothing_selected": "Zet in de instellingen van de widget minstens één onderdeel aan",
+    "now": "Nu",
+    "today": "Vandaag",
+    "tomorrow": "Morgen",
+    "tomorrow_lower": "morgen",
+    "tomorrow_pending": "De prijzen voor morgen volgen meestal in de loop van de middag",
+    "until": "tot __time__",
+    "next_short": "daarna",
+    "in_min": "over __n__ min",
+    "in_hours": "over __n__ u",
+    "best_running": "Goedkope periode loopt",
+    "peak_running": "Dure periode loopt",
+    "no_period_now": "Geen goedkope of dure periode nu",
+    "best_from": "goedkoop vanaf __time__ · __in__",
+    "peak_from": "duur vanaf __time__",
+    "best_until_short": "goedkoop tot __time__",
+    "peak_until_short": "duur tot __time__",
+    "best_in_short": "goedkoop __in__",
+    "peak_in_short": "duur __in__",
+    "no_periods_ahead": "Geen goedkope periode meer in de bekende prijzen",
+    "best_period": "Goedkope periode",
+    "peak_period": "Dure periode",
+    "gas_tomorrow": "morgen __price__ (__pct__)",
+    "gas_until": "geldig tot __time__",
+    "level": {
+      "very_cheap": "Zeer goedkoop",
+      "cheap": "Goedkoop",
+      "normal": "Normaal",
+      "expensive": "Duur",
+      "very_expensive": "Zeer duur"
+    },
+    "trend": {
+      "rising": "Prijs stijgt",
+      "falling": "Prijs daalt",
+      "stable": "Prijs blijft gelijk"
+    },
+    "volatility": {
+      "low": "Weinig schommeling",
+      "moderate": "Matige schommeling",
+      "high": "Sterke schommeling",
+      "very_high": "Zeer sterke schommeling"
+    },
+    "part": {
+      "night": "Nacht",
+      "morning": "Ochtend",
+      "afternoon": "Middag",
+      "evening": "Avond"
+    },
+    "view": {
+      "outlook": "Vooruit",
+      "today": "Vandaag",
+      "tomorrow": "Morgen",
+      "both": "2 dagen"
+    }
   }
 }

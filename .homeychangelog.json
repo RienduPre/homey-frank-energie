@@ -1,6 +1,22 @@
 {
-  "0.1.0": { "en": "Dynamic prices device", "nl": "Apparaat voor dynamische prijzen" },
-  "0.2.0": { "en": "Frank account: customer prices, monthly costs, usage and invoices", "nl": "Frank-account: eigen prijzen, maandkosten, verbruik en facturen" },
-  "0.3.0": { "en": "Home battery (Smart Trading), car and charger (Smart Charging) and solar (smart feed-in); one shared Frank login", "nl": "Thuisbatterij (Smart Trading), auto en laadpaal (Slim Laden) en zonnepanelen (slim terugleveren); één gedeelde Frank-login" },
-  "0.4.0": { "en": "Charge limits, ready-by time and solar charging; battery mode and trading strategy; smart heat pump status; Belgian prices", "nl": "Laadlimieten, klaar-om-tijd en zonneladen; batterijmodus en handelsstrategie; status slimme warmtepomp; Belgische prijzen" }
+  "0.1.0": {
+    "en": "Dynamic prices device",
+    "nl": "Apparaat voor dynamische prijzen"
+  },
+  "0.2.0": {
+    "en": "Frank account: customer prices, monthly costs, usage and invoices",
+    "nl": "Frank-account: eigen prijzen, maandkosten, verbruik en facturen"
+  },
+  "0.3.0": {
+    "en": "Home battery (Smart Trading), car and charger (Smart Charging) and solar (smart feed-in); one shared Frank login",
+    "nl": "Thuisbatterij (Smart Trading), auto en laadpaal (Slim Laden) en zonnepanelen (slim terugleveren); één gedeelde Frank-login"
+  },
+  "0.4.0": {
+    "en": "Charge limits, ready-by time and solar charging; battery mode and trading strategy; smart heat pump status; Belgian prices",
+    "nl": "Laadlimieten, klaar-om-tijd en zonneladen; batterijmodus en handelsstrategie; status slimme warmtepomp; Belgische prijzen"
+  },
+  "0.5.0": {
+    "en": "Dashboard widgets: price now (gauge, tile or clock), price forecast and price chart",
+    "nl": "Dashboard-widgets: prijs nu (meter, tegel of klok), prijsverwachting en prijsgrafiek"
+  }
 }

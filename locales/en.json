@@ -84,5 +84,69 @@
   "ev": {
     "vehicle": "car",
     "charger": "charger"
+  },
+  "widget": {
+    "locale": "en-GB",
+    "decimal_sep": ".",
+    "source_prices": "Dynamic prices",
+    "source_account": "Frank account",
+    "no_device": "Add a 'Dynamic prices' or 'Frank account' device first",
+    "error": "Something went wrong showing the prices",
+    "no_current": "No prices available yet",
+    "no_gas": "No gas price available",
+    "nothing_selected": "Switch on at least one section in the widget's settings",
+    "now": "Now",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "tomorrow_lower": "tomorrow",
+    "tomorrow_pending": "Tomorrow's prices usually arrive in the afternoon",
+    "until": "until __time__",
+    "next_short": "then",
+    "in_min": "in __n__ min",
+    "in_hours": "in __n__ h",
+    "best_running": "Best price period running",
+    "peak_running": "Peak price period running",
+    "no_period_now": "No best or peak price period now",
+    "best_from": "best price from __time__ · __in__",
+    "peak_from": "peak price from __time__",
+    "best_until_short": "best price until __time__",
+    "peak_until_short": "peak price until __time__",
+    "best_in_short": "best price __in__",
+    "peak_in_short": "peak price __in__",
+    "no_periods_ahead": "No more best price period in the known prices",
+    "best_period": "Best price",
+    "peak_period": "Peak price",
+    "gas_tomorrow": "tomorrow __price__ (__pct__)",
+    "gas_until": "valid until __time__",
+    "level": {
+      "very_cheap": "Very cheap",
+      "cheap": "Cheap",
+      "normal": "Normal",
+      "expensive": "Expensive",
+      "very_expensive": "Very expensive"
+    },
+    "trend": {
+      "rising": "Price rising",
+      "falling": "Price falling",
+      "stable": "Price stable"
+    },
+    "volatility": {
+      "low": "Low volatility",
+      "moderate": "Moderate volatility",
+      "high": "High volatility",
+      "very_high": "Very high volatility"
+    },
+    "part": {
+      "night": "Night",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "view": {
+      "outlook": "Outlook",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "both": "2 days"
+    }
   }
 }
