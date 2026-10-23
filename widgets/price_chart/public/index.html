@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="frank.css" />
+    <style>
+      .head { min-height: 64px; }
+      #top { position: relative; }
+      #top .res { position: absolute; top: 0; right: 0; width: 76px; }
+      #top .res button { padding: 3px 2px; font-size: 12px; }
+      .head .when { display: flex; align-items: center; gap: 6px; }
+      .pill { font-size: 11px; line-height: 16px; padding: 0 6px; border-radius: 999px; background: var(--fe-now); color: #fff; font-weight: 600; }
+      .head .main { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+      .head .chips { display: flex; gap: 4px; flex-wrap: nowrap; overflow: hidden; margin-top: 2px; height: 24px; }
+      .chart { display: block; width: 100%; touch-action: pan-y; cursor: crosshair; margin-top: 4px; }
+      .controls { display: flex; gap: 6px; margin-top: 8px; }
+      .controls .views { flex: 1 1 auto; min-width: 0; }
+      .controls button { padding: 5px 2px; font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+      .pending { height: 196px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; }
+    </style>
+  </head>
+
+  <body class="homey-widget">
+    <div id="root"></div>
+
+    <script src="frank.js"></script>
+    <script type="text/javascript">
+      'use strict';
+
+      const PLOT_H = 160;
+      const TOP = 18;
+      const AXIS = 22;
+      const STRIP = 8;
+      const LEFT = 30;
+      const RIGHT = 6;
+      const SVG_H = TOP + PLOT_H + AXIS + STRIP;
+      const CURSOR_RESET_MS = 30 * 1000;
+
+      const state = {
+        view: null,
+        res: null,
+        cursor: null, // `from` of the point under the cursor, null = now
+        cursorTimer: null,
+      };
+
+      // --------------------------------------------------------------- data
+
+      function series(data) {
+        if (state.res === '60') {
+          return data.hours.map((h) => ({
+            from: h.from,
+            till: h.till,
+            price: h.avg,
+            level: h.level,
+            period: h.best >= 0.5 ? 'best' : h.peak >= 0.5 ? 'peak' : null,
+            partial: (h.best > 0 && h.best < 0.5) || (h.peak > 0 && h.peak < 0.5),
+          }));
+        }
+        return data.slots;
+      }
+
+      function range(data) {
+        const [d0, d1] = data.days;
+        const t = Date.now();
+        switch (state.view) {
+          case 'today': return [d0.from, d0.till];
+          case 'tomorrow': return [d1.from, d1.till];
+          case 'both': return [d0.from, d1.available ? d1.till : d0.till];
+          default: {
+            const hourStart = Math.floor(t / 3600000) * 3600000;
+            return [hourStart - 3600000, d1.available ? d1.till : d0.till];
+          }
+        }
+      }
+
+      function niceStep(span, target) {
+        const raw = span / target;
+        const mag = 10 ** Math.floor(Math.log10(raw));
+        for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * mag) return m * mag;
+        return 10 * mag;
+      }
+
+      // ------------------------------------------------------------- header
+
+      function header(data, pt) {
+        if (!pt) return '<div class="head"></div>';
+        const t = Date.now();
+        const isNow = pt.from <= t && t < pt.till;
+        const day = FE.dayStats(FE.dayOf(pt.from));
+        const chips = [];
+        if (day && day.available) {
+          const dev = (pt.price - day.avg) / Math.max(Math.abs(day.avg), 0.05);
+          const arrow = dev > 0.005 ? '↑' : dev < -0.005 ? '↓' : '=';
+          chips.push(`<span class="fe-chip">${arrow} ${FE.pct(Math.abs(dev), false)} ⌀</span>`);
+        }
+        chips.push(`<span class="fe-chip"><span class="fe-dot" style="background:${FE.levelColor(pt.level)};margin-right:0"></span>${FE.esc(FE.levelName(pt.level))}</span>`);
+        const per = pt.period || (FE.periodAt(pt.from) ? FE.periodAt(pt.from).type : null);
+        if (per) chips.push(`<span class="fe-chip ${per}">${FE.esc(FE.t(per === 'best' ? 'best_period' : 'peak_period'))}</span>`);
+        const dayName = FE.dayOf(pt.from) === 0 ? FE.t('today') : FE.t('tomorrow');
+        return `<div class="head">
+          <div class="when fe-s fe-muted"><span class="fe-num">${FE.time(pt.from)}–${FE.time(pt.till)}</span>${isNow ? `<span class="pill">${FE.esc(FE.t('now'))}</span>` : `<span>· ${FE.esc(dayName)}</span>`}</div>
+          <div class="main"><span class="fe-xl fe-num">${FE.price(pt.price)}</span><span class="fe-s fe-muted">${FE.unitLabel()}</span></div>
+          <div class="chips">${chips.join('')}</div>
+        </div>`;
+      }
+
+      // -------------------------------------------------------------- chart
+
+      function chartSvg(data, points, from, till, width, cursorPt) {
+        const t = Date.now();
+        const W = width;
+        const x = (ms) => LEFT + ((ms - from) / (till - from)) * (W - LEFT - RIGHT);
+        const prices = points.map((p) => p.price);
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const span = max - min || Math.abs(max) || 0.01;
+        const lo = min - span * 0.1;
+        const hi = max + span * 0.15;
+        const y = (v) => TOP + (1 - (v - lo) / (hi - lo)) * PLOT_H;
+        const bottom = TOP + PLOT_H;
+        const cents = FE.settings.unit !== 'eur';
+        let svg = '';
+
+        // y grid
+        const step = niceStep(hi - lo, 3);
+        for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+          const yy = y(v);
+          svg += `<line x1="${LEFT}" x2="${W - RIGHT}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="var(--fe-track)" stroke-width="1"/>`;
+          const label = cents ? Math.round(v * 100) : v.toFixed(2).replace('.', FE.t('decimal_sep'));
+          svg += `<text x="${LEFT - 6}" y="${(yy + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--fe-muted)" class="fe-num">${label}</text>`;
+        }
+
+        // areas: one path per run of the same level (no seams between slots)
+        let run = null;
+        const flush = () => {
+          if (!run) return;
+          svg += `<path d="M${run.d}V${bottom}H${run.x0.toFixed(2)}Z" fill="${FE.levelColor(run.level)}" opacity="0.16"/>`;
+          run = null;
+        };
+        for (const p of points) {
+          const x0 = x(p.from); const x1 = x(p.till); const yy = y(p.price).toFixed(2);
+          if (run && (run.level !== p.level || run.till !== p.from)) flush();
+          if (!run) run = { level: p.level, x0, d: `${x0.toFixed(2)} ${bottom}V${yy}H${x1.toFixed(2)}`, till: p.till };
+          else { run.d += `V${yy}H${x1.toFixed(2)}`; run.till = p.till; }
+        }
+        flush();
+
+        // day separators, names and averages
+        for (const d of data.days) {
+          if (!d.available || d.till <= from || d.from >= till) continue;
+          const s = Math.max(d.from, from); const e = Math.min(d.till, till);
+          if (d.from > from) {
+            svg += `<line x1="${x(d.from).toFixed(1)}" x2="${x(d.from).toFixed(1)}" y1="${TOP - 4}" y2="${bottom}" stroke="var(--fe-line)" stroke-width="1"/>`;
+          }
+          if (state.view === 'both' || state.view === 'outlook') {
+            const name = d.key === 'today' ? FE.t('today') : FE.t('tomorrow');
+            if (e - s > 3 * 3600000) {
+              svg += `<text x="${((x(s) + x(e)) / 2).toFixed(1)}" y="11" text-anchor="middle" font-size="11" fill="var(--fe-muted)">${FE.esc(name)}</text>`;
+            }
+          }
+          const ya = y(d.avg);
+          svg += `<line x1="${x(s).toFixed(1)}" x2="${x(e).toFixed(1)}" y1="${ya.toFixed(1)}" y2="${ya.toFixed(1)}" stroke="var(--fe-muted)" stroke-width="1" stroke-dasharray="4 3"/>`;
+          if (x(e) - x(s) > 60) {
+            svg += `<text x="${(x(e) - 3).toFixed(1)}" y="${(ya - 4).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--fe-muted)" stroke="var(--homey-background-color, #fff)" stroke-width="3" paint-order="stroke" class="fe-num">⌀ ${FE.price(d.avg, { short: true })}</text>`;
+          }
+        }
+
+        // step line, colored per level
+        points.forEach((p, i) => {
+          const x0 = x(p.from); const x1 = x(p.till); const yy = y(p.price);
+          const next = points[i + 1];
+          let d = `M${x0.toFixed(2)} ${yy.toFixed(2)}H${x1.toFixed(2)}`;
+          if (next && next.from === p.till) d += `V${y(next.price).toFixed(2)}`;
+          svg += `<path d="${d}" stroke="${FE.levelColor(p.level)}" stroke-width="2" fill="none" stroke-linejoin="round"/>`;
+        });
+
+        // past shading
+        if (t > from && t < till) {
+          svg += `<rect x="${LEFT}" y="${TOP - 6}" width="${(x(t) - LEFT).toFixed(1)}" height="${PLOT_H + 6}" fill="var(--homey-background-color, #fff)" opacity="0.45"/>`;
+          svg += `<line x1="${x(t).toFixed(1)}" x2="${x(t).toFixed(1)}" y1="${TOP - 6}" y2="${bottom}" stroke="var(--fe-now)" stroke-width="1" opacity="0.6"/>`;
+        }
+
+        // low and high
+        const lowPt = points.reduce((m, p) => (p.price < m.price ? p : m), points[0]);
+        const highPt = points.reduce((m, p) => (p.price > m.price ? p : m), points[0]);
+        for (const [p, below] of [[lowPt, true], [highPt, false]]) {
+          const cx = (x(p.from) + x(p.till)) / 2; const cy = y(p.price);
+          const tx = Math.min(W - RIGHT - 14, Math.max(LEFT + 14, cx));
+          svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="${FE.levelColor(p.level)}"/>`;
+          svg += `<text x="${tx.toFixed(1)}" y="${(below ? cy + 15 : cy - 7).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--homey-text-color, #000)" class="fe-num">${FE.price(p.price, { short: true })}</text>`;
+        }
+
+        // x axis hours
+        const pxPerHour = (W - LEFT - RIGHT) / ((till - from) / 3600000);
+        const every = [1, 2, 3, 4, 6, 12].find((n) => n * pxPerHour >= 34) || 24;
+        for (let ms = Math.ceil(from / 3600000) * 3600000; ms < till; ms += 3600000) {
+          const h = Number(FE.hour(ms));
+          if (h % every !== 0) continue;
+          const xx = x(ms);
+          if (xx < LEFT + 6 || xx > W - RIGHT - 6) continue;
+          svg += `<line x1="${xx.toFixed(1)}" x2="${xx.toFixed(1)}" y1="${bottom}" y2="${bottom + 4}" stroke="var(--fe-line)"/>`;
+          svg += `<text x="${xx.toFixed(1)}" y="${bottom + 16}" text-anchor="middle" font-size="11" fill="var(--fe-muted)" font-weight="${h === 0 ? 700 : 400}" class="fe-num">${String(h).padStart(2, '0')}</text>`;
+        }
+
+        // period strips
+        const sy = bottom + AXIS;
+        svg += `<rect x="${LEFT}" y="${sy}" width="${W - LEFT - RIGHT}" height="4" rx="2" fill="var(--fe-track)"/>`;
+        for (const p of data.periods) {
+          if (p.till <= from || p.from >= till) continue;
+          const x0 = x(Math.max(p.from, from)); const x1 = x(Math.min(p.till, till));
+          svg += `<rect x="${x0.toFixed(1)}" y="${sy}" width="${Math.max(2, x1 - x0).toFixed(1)}" height="4" rx="2" fill="var(--fe-${p.type})"/>`;
+        }
+
+        geom = { from, till, width: W, points, x, y };
+        return `<svg class="chart" id="chart" viewBox="0 0 ${W} ${SVG_H}" height="${SVG_H}">${svg}<g id="cursor">${cursorMarkup(cursorPt)}</g></svg>`;
+      }
+
+      function cursorMarkup(pt) {
+        if (!pt || !geom) return '';
+        const cx = (geom.x(pt.from) + geom.x(pt.till)) / 2; const cy = geom.y(pt.price);
+        return `<line x1="${cx.toFixed(1)}" x2="${cx.toFixed(1)}" y1="${TOP - 6}" y2="${TOP + PLOT_H}" stroke="var(--homey-text-color, #000)" stroke-width="1" opacity="0.35"/>`
+          + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${FE.levelColor(pt.level)}" opacity="0.25"/>`
+          + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="${FE.levelColor(pt.level)}" stroke="var(--homey-background-color, #fff)" stroke-width="1.5"/>`;
+      }
+
+      // ----------------------------------------------------------- controls
+
+      function controls(data) {
+        if (FE.settings.show_controls === false) return '';
+        const views = ['outlook', 'today', 'tomorrow', 'both']
+          .map((v) => `<button data-view="${v}" class="${state.view === v ? 'on' : ''}">${FE.esc(FE.t(`view.${v}`))}</button>`).join('');
+        return `<div class="controls"><div class="fe-seg views">${views}</div></div>`;
+      }
+
+      function resSwitch() {
+        if (FE.settings.show_controls === false) return '';
+        const res = ['15', '60']
+          .map((r) => `<button data-res="${r}" class="${state.res === r ? 'on' : ''}">${r}′</button>`).join('');
+        return `<div class="fe-seg res">${res}</div>`;
+      }
+
+      // ------------------------------------------------------------- render
+
+      let geom = null; // for pointer → point mapping
+
+      function render(data) {
+        const root = document.getElementById('root');
+        const width = Math.max(200, Math.floor(root.clientWidth || document.body.clientWidth - 32));
+        const [from, till] = range(data);
+        const points = series(data).filter((p) => p.till > from && p.from < till);
+
+        let body;
+        let cursorPt = null;
+        if (!points.length) {
+          const msg = state.view === 'tomorrow' ? FE.t('tomorrow_pending') : FE.t('no_current');
+          body = `<div class="head"></div><div class="pending fe-s fe-muted">${FE.esc(msg)}</div>`;
+          geom = null;
+        } else {
+          const t = Date.now();
+          if (state.cursor !== null) cursorPt = points.find((p) => p.from <= state.cursor && state.cursor < p.till) || null;
+          if (!cursorPt) cursorPt = points.find((p) => p.from <= t && t < p.till) || null;
+          const headerPt = cursorPt || points[0];
+          const chart = chartSvg(data, points, from, till, width, cursorPt);
+          body = `<div id="top"><div id="headwrap">${header(data, headerPt)}</div>${resSwitch()}</div>${chart}`;
+        }
+        root.innerHTML = body + controls(data);
+        bind();
+        FE.fitHeight();
+      }
+
+      function pointAt(clientX) {
+        const svg = document.getElementById('chart');
+        if (!svg || !geom) return null;
+        const r = svg.getBoundingClientRect();
+        const px = ((clientX - r.left) / r.width) * geom.width;
+        const ms = geom.from + ((px - LEFT) / (geom.width - LEFT - RIGHT)) * (geom.till - geom.from);
+        const pts = geom.points;
+        return pts.find((p) => p.from <= ms && ms < p.till) || (ms < pts[0].from ? pts[0] : pts[pts.length - 1]);
+      }
+
+      /** Move the cursor without rebuilding the chart (keeps the drag alive). */
+      function setCursor(pt) {
+        if (!pt || pt.from === state.cursor) return;
+        state.cursor = pt.from;
+        if (FE.Homey && FE.Homey.hapticFeedback) FE.Homey.hapticFeedback();
+        const g = document.getElementById('cursor');
+        const h = document.getElementById('headwrap');
+        if (g) g.innerHTML = cursorMarkup(pt);
+        if (h) h.innerHTML = header(FE.data, pt);
+        clearTimeout(state.cursorTimer);
+        state.cursorTimer = setTimeout(() => { state.cursor = null; render(FE.data); }, CURSOR_RESET_MS);
+      }
+
+      let dragging = false;
+
+      function bind() {
+        const svg = document.getElementById('chart');
+        if (svg) {
+          svg.addEventListener('pointerdown', (e) => { dragging = true; setCursor(pointAt(e.clientX)); });
+          svg.addEventListener('pointermove', (e) => {
+            if (dragging || e.pointerType === 'mouse') setCursor(pointAt(e.clientX));
+          });
+        }
+        document.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
+          state.view = b.dataset.view; state.cursor = null; render(FE.data);
+        }));
+        document.querySelectorAll('[data-res]').forEach((b) => b.addEventListener('click', () => {
+          state.res = b.dataset.res; render(FE.data);
+        }));
+      }
+
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => document.addEventListener(ev, () => { dragging = false; }));
+
+      function onHomeyReady(Homey) {
+        const s = Homey.getSettings() || {};
+        state.view = s.view || 'outlook';
+        state.res = s.resolution || '15';
+        FE.start(Homey, { render });
+      }
+    </script>
+  </body>
+</html>

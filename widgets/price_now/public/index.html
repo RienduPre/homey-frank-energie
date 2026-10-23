@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="frank.css" />
+    <style>
+      /* Tile */
+      .tile { gap: 12px; min-height: 48px; }
+      .tile .ring { width: 44px; height: 44px; flex: none; }
+      .tile .price { display: flex; align-items: baseline; gap: 6px; }
+
+      /* Gauge */
+      .gauge-wrap { position: relative; }
+      .gauge-wrap .trend-corner { position: absolute; top: 0; right: 0; }
+      .gauge { display: block; width: 100%; max-width: 260px; margin: 0 auto; }
+      .gauge .center { text-anchor: middle; }
+      .verdict-box { margin-top: 6px; }
+
+      /* Clock */
+      .clock { display: block; width: 100%; max-width: 250px; margin: 0 auto; }
+
+      /* Gas */
+      .flame { width: 40px; height: 40px; flex: none; color: var(--homey-color-blue, #1a73e8); }
+    </style>
+  </head>
+
+  <body class="homey-widget">
+    <div id="root"></div>
+
+    <script src="frank.js"></script>
+    <script type="text/javascript">
+      'use strict';
+
+      const START = -120; // gauge arc, degrees from the top, clockwise
+      const END = 120;
+
+      /** Today's stats for the slot's day, used as the scale. */
+      function scaleFor(slot) {
+        const day = FE.dayStats(FE.dayOf(slot.from));
+        if (day && day.available) return { min: day.min, max: day.max, avg: day.avg };
+        return { min: slot.price, max: slot.price, avg: slot.price };
+      }
+
+      function fraction(price, scale) {
+        if (scale.max <= scale.min) return 0.5;
+        return Math.min(1, Math.max(0, (price - scale.min) / (scale.max - scale.min)));
+      }
+
+      // ------------------------------------------------------------- tile
+
+      function ringSvg(slot, scale) {
+        const f = Math.max(0.04, fraction(slot.price, scale));
+        const a1 = START + (END - START) * f;
+        return `<svg class="ring" viewBox="0 0 44 44">
+          <path d="${FE.arc(22, 22, 17, START, END)}" stroke="var(--fe-track)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="${FE.arc(22, 22, 17, START, a1)}" stroke="${FE.levelColor(slot.level)}" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      function renderTile(data, cur) {
+        const v = FE.verdict();
+        const scale = scaleFor(cur);
+        const trend = data.current ? data.current.trend : 'stable';
+        const sub = [FE.levelName(cur.level), v.short].filter(Boolean).join(' · ');
+        return `<div class="fe-row tile">
+          ${ringSvg(cur, scale)}
+          <div class="fe-grow">
+            <div class="price fe-nowrap"><span class="fe-l fe-num">${FE.price(cur.price)}</span><span class="fe-s fe-muted">${FE.unitLabel()}</span></div>
+            <div class="fe-s fe-muted fe-nowrap">${FE.esc(sub)}</div>
+          </div>
+          ${FE.trendIcon(trend)}
+        </div>`;
+      }
+
+      // ------------------------------------------------------------ gauge
+
+      function renderGauge(data, cur) {
+        const scale = scaleFor(cur);
+        const f = Math.max(0.03, fraction(cur.price, scale));
+        const cx = 120; const cy = 104; const r = 86;
+        const a1 = START + (END - START) * f;
+        const aAvg = START + (END - START) * fraction(scale.avg, scale);
+        const [t0x, t0y] = FE.polar(cx, cy, r - 15, aAvg);
+        const [t1x, t1y] = FE.polar(cx, cy, r + 15, aAvg);
+        const [minX, minY] = FE.polar(cx, cy, r, START);
+        const [maxX, maxY] = FE.polar(cx, cy, r, END);
+        const next = data.current && data.current.next && data.current.from === cur.from ? data.current.next : null;
+        const v = FE.verdict();
+        const trend = data.current ? data.current.trend : 'stable';
+
+        const lines = v.lines.map((l) => `<div class="fe-s">${FE.esc(l)}</div>`).join('');
+        const small = (x, y, txt, anchor = 'middle') => `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" font-size="12" fill="var(--fe-muted)" class="fe-num">${txt}</text>`;
+        return `<div class="gauge-wrap">
+          <div class="trend-corner">${FE.trendIcon(trend)}</div>
+          <svg class="gauge" viewBox="0 0 240 194">
+            <path d="${FE.arc(cx, cy, r, START, END)}" stroke="var(--fe-track)" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <path d="${FE.arc(cx, cy, r, START, a1)}" stroke="${FE.levelColor(cur.level)}" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <line x1="${t0x.toFixed(1)}" y1="${t0y.toFixed(1)}" x2="${t1x.toFixed(1)}" y2="${t1y.toFixed(1)}" stroke="var(--homey-text-color, #000)" stroke-width="2.5" stroke-linecap="round" opacity="0.75"/>
+            <text class="center fe-num" x="${cx}" y="${cy - 2}" font-size="36" font-weight="700" fill="var(--homey-text-color, #000)">${FE.price(cur.price)}</text>
+            <text class="center" x="${cx}" y="${cy + 18}" font-size="13" fill="var(--fe-muted)">${FE.unitLabel()}</text>
+            <text class="center" x="${cx}" y="${cy + 42}" font-size="14" font-weight="600" fill="var(--homey-text-color, #000)"><tspan fill="${FE.levelColor(cur.level)}">●</tspan> ${FE.esc(FE.levelName(cur.level))}</text>
+            ${small(minX, minY + 20, FE.price(scale.min, { short: true }))}
+            ${small(maxX, maxY + 20, FE.price(scale.max, { short: true }))}
+            ${small(cx, cy + 86, `${FE.esc(FE.t('until', { time: FE.time(cur.till) }))}${next ? ` · ${FE.esc(FE.t('next_short'))} ${FE.price(next.price)}` : ''} · ⌀ ${FE.price(scale.avg, { short: true })}`)}
+          </svg>
+          <div class="fe-verdict verdict-box ${v.type}">
+            <div class="fe-m fe-medium">${FE.esc(v.title)}</div>
+            ${lines}
+          </div>
+        </div>`;
+      }
+
+      // ------------------------------------------------------------ clock
+
+      /** Clock angle (0 = 12 o'clock) of a time, on a 12-hour dial. */
+      function clockAngle(ms) {
+        const [h, m] = FE.time(ms).split(':').map(Number);
+        return (((h % 12) * 60 + m) / 720) * 360;
+      }
+
+      function renderClock(data, cur) {
+        const now = Date.now();
+        const end = cur.from + 12 * 3600000;
+        const cx = 120; const cy = 120; const r = 84;
+        let segs = '';
+        for (const s of data.slots) {
+          if (s.till <= cur.from || s.from >= end) continue;
+          const from = Math.max(s.from, cur.from);
+          const till = Math.min(s.till, end);
+          const a0 = clockAngle(from);
+          // small gap between slots
+          const a1 = a0 + ((till - from) / 43200000) * 360 - 0.6;
+          const last = s.till >= end; // right behind the hand: twelve hours from now
+          if (a1 <= a0) continue;
+          segs += `<path d="${FE.arc(cx, cy, r, a0, a1)}" stroke="${FE.levelColor(s.level)}" stroke-width="20" fill="none" opacity="${last ? 0.35 : 1}"/>`;
+        }
+        let periods = '';
+        for (const p of data.periods) {
+          if (p.till <= now || p.from >= end) continue;
+          const from = Math.max(p.from, now);
+          const till = Math.min(p.till, end);
+          const a0 = clockAngle(from);
+          const a1 = a0 + ((till - from) / 43200000) * 360;
+          periods += `<path d="${FE.arc(cx, cy, r + 17, a0, a1)}" stroke="var(--fe-${p.type})" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+        }
+        // Hour numbers at 12, 3, 6 and 9: the real hour each position stands for.
+        let numbers = '';
+        const [nowH, nowM] = FE.time(now).split(':').map(Number);
+        for (const pos of [0, 3, 6, 9]) {
+          let i = 0;
+          while ((nowH + i) % 12 !== pos) i++;
+          // A position the hand already passed stands for twelve hours later.
+          if (i === 0 && nowM > 0) i = 12;
+          const h = (nowH + i) % 24;
+          const [x, y] = FE.polar(cx, cy, r - 24, pos * 30);
+          numbers += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="12" fill="var(--fe-muted)" class="fe-num">${String(h).padStart(2, '0')}</text>`;
+        }
+        const aNow = clockAngle(now);
+        const [hx, hy] = FE.polar(cx, cy, r + 12, aNow);
+        const [h0x, h0y] = FE.polar(cx, cy, 42, aNow);
+        const v = FE.verdict();
+        return `<svg class="clock" viewBox="0 0 240 240">
+            ${periods}
+            ${segs}
+            ${numbers}
+            <line x1="${h0x.toFixed(1)}" y1="${h0y.toFixed(1)}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="var(--homey-text-color, #000)" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+            <text x="${cx}" y="${cy + 2}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--homey-text-color, #000)" class="fe-num">${FE.price(cur.price)}</text>
+            <text x="${cx}" y="${cy + 20}" text-anchor="middle" font-size="12" fill="var(--fe-muted)" font-weight="600">${FE.esc(FE.levelName(cur.level))}</text>
+          </svg>
+          <div class="fe-s fe-muted" style="text-align:center">${FE.esc(FE.unitLabel())} · ${FE.esc(v.short || v.lines[0] || '')}</div>`;
+      }
+
+      // -------------------------------------------------------------- gas
+
+      function renderGas(data) {
+        if (!data.gas) return `<div class="fe-message fe-s">${FE.esc(FE.t('no_gas'))}</div>`;
+        const g = data.gas;
+        const sub = g.tomorrow !== null && g.tomorrow !== undefined
+          ? FE.t('gas_tomorrow', { price: `€ ${new Intl.NumberFormat(FE.locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(g.tomorrow)}`, pct: FE.pct((g.tomorrow - g.price) / Math.abs(g.price || 1)) })
+          : FE.t('gas_until', { time: FE.when(g.till) });
+        return `<div class="fe-row tile">
+          <svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3.5 5 6 5 11a5 5 0 0 1-10 0c0-2.4 1.2-4 2.5-5.3.2 1.6 1 2.8 2.2 3.3C11 8.6 11.3 5.2 12 2z"/></svg>
+          <div class="fe-grow">
+            <div class="price fe-nowrap"><span class="fe-l fe-num">€ ${new Intl.NumberFormat(FE.locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(g.price)}</span><span class="fe-s fe-muted">/m³</span></div>
+            <div class="fe-s fe-muted fe-nowrap">${FE.esc(sub)}</div>
+          </div>
+        </div>`;
+      }
+
+      // ----------------------------------------------------------- render
+
+      function render(data) {
+        const root = document.getElementById('root');
+        const style = FE.settings.style || 'gauge';
+        if (FE.settings.energy === 'gas') {
+          root.innerHTML = renderGas(data);
+        } else {
+          const cur = FE.currentSlot();
+          if (!cur) {
+            root.innerHTML = `<div class="fe-message fe-s">${FE.esc(FE.t('no_current'))}</div>`;
+          } else if (style === 'tile') {
+            root.innerHTML = renderTile(data, cur);
+          } else if (style === 'clock') {
+            root.innerHTML = renderClock(data, cur);
+          } else {
+            root.innerHTML = renderGauge(data, cur);
+          }
+        }
+        FE.fitHeight();
+      }
+
+      function onHomeyReady(Homey) {
+        FE.start(Homey, { render });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="frank.css" />
+    <style>
+      section + section { margin-top: 14px; padding-top: 12px; border-top: var(--homey-line-light, 1px solid rgba(128,128,128,.2)); }
+
+      /* Now */
+      .nowline { gap: 10px; }
+      .nowline .scale { position: relative; height: 6px; border-radius: 3px; background: var(--fe-track); margin-top: 6px; }
+      .nowline .scale .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+      .nowline .scale .avg { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--homey-text-color, #000); opacity: .6; border-radius: 1px; }
+
+      /* Hours */
+      .hours { display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 0 -4px; padding: 0 4px; }
+      .hours::-webkit-scrollbar { display: none; }
+      .daygroup { position: relative; display: flex; flex: none; }
+      .daygroup + .daygroup { border-left: var(--homey-line-light, 1px solid rgba(128,128,128,.25)); margin-left: 4px; padding-left: 4px; }
+      .daygroup .dayname { position: absolute; top: 0; left: 4px; white-space: nowrap; }
+      .daygroup .avgline { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--fe-line); pointer-events: none; }
+      .hcol { width: 42px; flex: none; display: flex; flex-direction: column; align-items: center; padding: 22px 3px 4px; border-radius: 10px; cursor: pointer; position: relative; }
+      .hcol.now { background: var(--fe-now-tint); }
+      .hcol.sel { background: var(--fe-tint); }
+      .hcol.past { opacity: .45; }
+      .hcol .chipslot { height: 18px; display: flex; align-items: center; }
+      .hcol .label { height: 18px; line-height: 18px; font-size: 13px; }
+      .hcol.now .label { font-weight: 700; }
+      .hcol .barbox { height: 56px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+      .hcol .bar { width: 22px; border-radius: 5px; min-height: 4px; }
+      .hcol .val { font-size: 13px; line-height: 20px; margin-top: 2px; }
+      .hcol.now .val { font-weight: 700; }
+      .hcol .fe-periods { width: 28px; margin-top: 3px; }
+      .hcol .badge { position: absolute; top: 2px; right: 0; width: 16px; height: 16px; border-radius: 50%; color: #fff; font-size: 11px; line-height: 16px; text-align: center; font-weight: 700; }
+      .badge.best { background: var(--fe-best); }
+      .badge.peak { background: var(--fe-peak); }
+
+      .detail { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--fe-tint); }
+      .detail .quarters { display: flex; gap: 6px; margin-top: 6px; }
+      .detail .q { flex: 1 1 0; text-align: center; }
+      .detail .q .qb { height: 6px; border-radius: 3px; margin-bottom: 3px; }
+
+      /* Parts of the day */
+      .parts { display: flex; gap: 4px; }
+      .pcol { flex: 1 1 0; min-width: 0; text-align: center; padding: 6px 2px; border-radius: 10px; position: relative; }
+      .pcol.now { background: var(--fe-now-tint); }
+      .pcol .glyph { position: relative; height: 48px; margin: 4px auto 2px; width: 14px; }
+      .pcol .span { position: absolute; left: 0; right: 0; border-radius: 4px; min-height: 4px; }
+      .pcol .tick { position: absolute; left: -3px; right: -3px; height: 2px; background: var(--homey-text-color, #000); opacity: .75; }
+      .pcol .fe-periods { width: 70%; margin: 4px auto 0; }
+      .pcol .chipslot { height: 18px; }
+      .pcol .daytag { font-size: 11px; line-height: 14px; height: 14px; }
+
+      /* Days */
+      .dayrow + .dayrow { margin-top: 10px; }
+      .dayrow .top { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+      .dayrow .track { position: relative; height: 22px; }
+      .dayrow .spanbar { position: absolute; top: 7px; height: 8px; border-radius: 4px; }
+      .dayrow .lo, .dayrow .hi { position: absolute; top: 2px; font-size: 12px; line-height: 18px; white-space: nowrap; }
+      .dayrow .lo { transform: translateX(calc(-100% - 6px)); }
+      .dayrow .hi { transform: translateX(6px); }
+      .dayrow .med { position: absolute; top: 16px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 6px solid var(--homey-text-color, #000); transform: translateX(-5px); opacity: .7; }
+      .dayrow .cur { position: absolute; top: 0; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--fe-now); transform: translateX(-5px); }
+      .dayrow .name { min-width: 64px; }
+      .dayrow .info { display: flex; gap: 8px; justify-content: space-between; margin-top: 1px; }
+    </style>
+  </head>
+
+  <body class="homey-widget">
+    <div id="root"></div>
+
+    <script src="frank.js"></script>
+    <script type="text/javascript">
+      'use strict';
+
+      let selectedHour = null; // `from` of the hour tapped for details
+      let scrollLeft = 0;
+
+      const on = (key) => FE.settings[key] !== false;
+
+      // ---------------------------------------------------------------- now
+
+      function renderNow(data) {
+        const cur = FE.currentSlot();
+        if (!cur) return '';
+        const day = FE.dayStats(FE.dayOf(cur.from));
+        const v = FE.verdict();
+        let scale = '';
+        if (day && day.available && day.max > day.min) {
+          const f = Math.min(1, Math.max(0.03, (cur.price - day.min) / (day.max - day.min)));
+          const a = (day.avg - day.min) / (day.max - day.min);
+          scale = `<div class="scale"><div class="fill" style="width:${(f * 100).toFixed(1)}%;background:${FE.levelColor(cur.level)}"></div><div class="avg" style="left:calc(${(a * 100).toFixed(1)}% - 1px)"></div></div>`;
+        }
+        const sub = [FE.levelName(cur.level), v.short].filter(Boolean).join(' · ');
+        return `<section><div class="fe-row nowline">
+          <div class="fe-grow">
+            <div class="fe-nowrap"><span class="fe-l fe-num">${FE.price(cur.price)}</span> <span class="fe-s fe-muted">${FE.unitLabel()}</span></div>
+            <div class="fe-s fe-muted fe-nowrap"><span class="fe-dot" style="background:${FE.levelColor(cur.level)}"></span>${FE.esc(sub)}</div>
+            ${scale}
+          </div>
+          ${FE.trendIcon(data.current ? data.current.trend : 'stable')}
+        </div></section>`;
+      }
+
+      // -------------------------------------------------------------- hours
+
+      function periodLine(slots) {
+        return `<div class="fe-periods">${slots.map((s) => {
+          const p = FE.periodAt(s.from);
+          return `<i class="${p ? p.type : ''}"></i>`;
+        }).join('')}</div>`;
+      }
+
+      /** Index (in `hours`) of the cheapest upcoming hour of a day, if not now. */
+      function cheapestUpcoming(hours, day, curHour) {
+        let best = null;
+        hours.forEach((h, i) => {
+          if (h.day !== day || h.till <= Date.now()) return;
+          if (best === null || h.avg < hours[best].avg) best = i;
+        });
+        if (best === null || (curHour && hours[best].from === curHour.from)) return null;
+        return best;
+      }
+
+      function renderHours(data) {
+        const t = Date.now();
+        const all = data.hours;
+        const curIdx = all.findIndex((h) => h.from <= t && t < h.till);
+        const start = Math.max(0, curIdx - 1);
+        const hours = all.slice(curIdx < 0 ? 0 : start);
+        if (!hours.length) return '';
+        const curHour = curIdx >= 0 ? all[curIdx] : null;
+
+        const lo0 = Math.min(...hours.map((h) => h.avg));
+        const hi = Math.max(...hours.map((h) => h.avg));
+        const range = hi - lo0 || Math.abs(hi) || 1;
+        const lo = lo0 - range * 0.6; // bars never start at zero height
+        const height = (v) => 4 + Math.max(0, Math.min(1, (v - lo) / (hi - lo || 1))) * 52;
+
+        const chips = new Set();
+        for (const day of [0, 1]) {
+          const i = cheapestUpcoming(hours, day, curHour);
+          if (i !== null) chips.add(i);
+        }
+
+        const groups = [0, 1].map((day) => {
+          const list = hours.map((h, i) => ({ h, i })).filter(({ h }) => h.day === day);
+          if (!list.length) return '';
+          const stats = FE.dayStats(day);
+          const name = day === 0 ? FE.t('today') : FE.t('tomorrow');
+          const cols = list.map(({ h, i }) => {
+            const isNow = curHour && h.from === curHour.from;
+            const past = h.till <= t;
+            let chip = '';
+            if (chips.has(i) && curHour) {
+              const save = (h.avg - curHour.avg) / Math.max(Math.abs(curHour.avg), 0.05);
+              if (save < -0.005) chip = `<span class="fe-chip small best">${FE.pct(save)}</span>`;
+            }
+            let badge = '';
+            if (isNow) {
+              const p = FE.periodAt(t);
+              if (p) badge = `<span class="badge ${p.type}">${p.type === 'best' ? '€' : '!'}</span>`;
+            }
+            const cls = ['hcol', isNow ? 'now' : '', past ? 'past' : '', selectedHour === h.from ? 'sel' : ''].join(' ');
+            return `<div class="${cls}" data-from="${h.from}">
+              ${badge}
+              <div class="chipslot">${chip}</div>
+              <div class="label">${isNow ? FE.esc(FE.t('now')) : FE.hour(h.from)}</div>
+              <div class="barbox"><div class="bar" style="height:${height(h.avg).toFixed(1)}px;background:${FE.levelColor(h.level)}"></div></div>
+              <div class="val fe-num">${FE.price(h.avg, { short: true })}</div>
+              ${periodLine(h.slots.map((s) => ({ from: s.from })))}
+            </div>`;
+          }).join('');
+          // Dashed line at the day's average: 22 px header + 18 chip + 18 label + 56 bar box.
+          const avgLine = stats && stats.available
+            ? `<div class="avgline" style="top:${(22 + 18 + 18 + 56 - height(stats.avg)).toFixed(1)}px"></div>` : '';
+          return `<div class="daygroup"><div class="dayname fe-xs fe-medium">${FE.esc(name)} · ${FE.esc(FE.weekday(list[0].h.from))}</div>${avgLine}${cols}</div>`;
+        }).join('');
+
+        let detail = '';
+        const sel = selectedHour !== null ? all.find((h) => h.from === selectedHour) : null;
+        if (sel) {
+          const qs = sel.slots.map((s) => `<div class="q"><div class="qb" style="background:${FE.levelColor(s.level)}"></div><div class="fe-xs fe-muted">${FE.time(s.from)}</div><div class="fe-s fe-num">${FE.price(s.price, { short: true })}</div></div>`).join('');
+          const p = FE.periodAt(sel.from);
+          detail = `<div class="detail">
+            <div class="fe-s"><span class="fe-medium">${FE.time(sel.from)}–${FE.time(sel.till)}</span> · <span class="fe-dot" style="background:${FE.levelColor(sel.level)}"></span>${FE.esc(FE.levelName(sel.level))} · ⌀ <span class="fe-num">${FE.priceUnit(sel.avg)}</span>${p ? ` · <span class="${p.type === 'best' ? 'fe-good' : 'fe-bad'}">${FE.esc(FE.t(p.type === 'best' ? 'best_period' : 'peak_period'))}</span>` : ''}</div>
+            ${sel.slots.length > 1 ? `<div class="quarters">${qs}</div>` : ''}
+          </div>`;
+        }
+        return `<section><div class="hours" id="hours">${groups}</div>${detail}</section>`;
+      }
+
+      // -------------------------------------------------------------- parts
+
+      function renderParts(data) {
+        const t = Date.now();
+        const idx = data.parts.findIndex((p) => p.from <= t && t < p.till);
+        const parts = data.parts.slice(Math.max(0, idx), Math.max(0, idx) + 4);
+        if (!parts.length) return '';
+        const lo = Math.min(...parts.map((p) => p.min));
+        const hi = Math.max(...parts.map((p) => p.max));
+        const y = (v) => (hi > lo ? (1 - (v - lo) / (hi - lo)) * 44 : 22);
+        const current = idx >= 0 ? data.parts[idx] : null;
+
+        // Cheapest coming part (not the running one) gets a savings chip.
+        let cheapest = null;
+        parts.forEach((p, i) => { if (i > 0 && (cheapest === null || p.avg < parts[cheapest].avg)) cheapest = i; });
+
+        const cols = parts.map((p, i) => {
+          const isNow = current && p.from === current.from;
+          const top = y(p.max);
+          const bottom = y(p.min);
+          let chip = '';
+          if (i === cheapest && current) {
+            const save = (p.avg - current.avg) / Math.max(Math.abs(current.avg), 0.05);
+            if (save < -0.005) chip = `<span class="fe-chip small best">${FE.pct(save)}</span>`;
+          }
+          const arrow = p.level <= 2
+            ? `<span class="fe-good">↓ ${FE.time(p.minAt)}</span>`
+            : `<span class="fe-bad">↑ ${FE.time(p.maxAt)}</span>`;
+          const slots = data.slots.filter((s) => s.from >= p.from && s.from < p.till);
+          // Period line in at most 24 segments.
+          const step = Math.max(1, Math.ceil(slots.length / 24));
+          const seg = slots.filter((_, k) => k % step === 0);
+          return `<div class="pcol ${isNow ? 'now' : ''}">
+            <div class="chipslot">${chip}</div>
+            <div class="fe-s ${isNow ? 'fe-bold' : 'fe-medium'} fe-nowrap">${FE.esc(FE.t(`part.${p.id}`))}</div>
+            <div class="daytag fe-muted">${p.day === 1 && FE.dayOf(t) === 0 ? FE.esc(FE.t('tomorrow_lower')) : ''}</div>
+            <div class="glyph">
+              <div class="span" style="top:${top.toFixed(1)}px;height:${Math.max(4, bottom - top).toFixed(1)}px;background:${FE.levelColor(p.level)}"></div>
+              <div class="tick" style="top:${(y(p.avg) - 1).toFixed(1)}px"></div>
+            </div>
+            <div class="fe-m fe-medium fe-num">${FE.price(p.avg, { short: true })}</div>
+            <div class="fe-xs fe-muted fe-num fe-nowrap">${FE.price(p.min, { short: true })}–${FE.price(p.max, { short: true })}</div>
+            <div class="fe-xs fe-num">${arrow}</div>
+            ${periodLine(seg)}
+          </div>`;
+        }).join('');
+        return `<section><div class="parts">${cols}</div></section>`;
+      }
+
+      // --------------------------------------------------------------- days
+
+      /** Gradient over a day's span in the level colors. */
+      function spanGradient(day) {
+        const pos = (v) => ((v - day.min) / (day.max - day.min || 1)) * 100;
+        const a = Math.max(Math.abs(day.avg), 0.05);
+        const edges = [-Infinity, day.avg - 0.2 * a, day.avg - 0.1 * a, day.avg + 0.1 * a, day.avg + 0.2 * a, Infinity];
+        const stops = [];
+        for (let k = 0; k < 5; k++) {
+          const start = Math.max(day.min, edges[k]);
+          const end = Math.min(day.max, edges[k + 1]);
+          if (end < start) continue;
+          stops.push(`var(--fe-l${k}) ${pos(start).toFixed(1)}%`, `var(--fe-l${k}) ${pos(end).toFixed(1)}%`);
+        }
+        return stops.length ? `linear-gradient(90deg, ${stops.join(', ')})` : 'var(--fe-l2)';
+      }
+
+      function renderDays(data) {
+        const days = data.days.filter((d) => d.available);
+        if (!data.days.length) return '';
+        const lo = Math.min(...days.map((d) => d.min));
+        const hi = Math.max(...days.map((d) => d.max));
+        // Leave room at both ends for the low and high labels.
+        const x = (v) => 22 + ((v - lo) / (hi - lo || 1)) * 56;
+        const cur = FE.currentSlot();
+
+        const rows = data.days.map((d, i) => {
+          const name = i === 0 ? FE.t('today') : FE.t('tomorrow');
+          if (!d.available) {
+            return `<div class="dayrow"><div class="top"><div class="fe-m fe-medium name">${FE.esc(name)}</div><div class="fe-s fe-muted">${FE.esc(FE.t('tomorrow_pending'))}</div><div></div></div></div>`;
+          }
+          const p = i === 0 ? FE.periodAt(Date.now()) : null;
+          const badge = p ? ` <span class="badge ${p.type}" style="position:static;display:inline-block;width:16px;height:16px;border-radius:50%;color:#fff;font-size:11px;line-height:16px;text-align:center">${p.type === 'best' ? '€' : '!'}</span>` : '';
+          const curMark = i === 0 && cur && FE.dayOf(cur.from) === 0
+            ? `<div class="cur" style="left:${x(cur.price).toFixed(1)}%"></div>` : '';
+          let cmp = '';
+          if (i === 1 && d.vsToday !== undefined && d.vsToday !== null) {
+            cmp = `<span class="${d.vsToday > 0 ? 'fe-bad' : 'fe-good'} fe-num">${FE.pct(d.vsToday)}</span>`;
+          }
+          return `<div class="dayrow">
+            <div class="top">
+              <div class="fe-m fe-medium name">${FE.esc(name)}${badge}</div>
+              <div class="track">
+                <div class="lo fe-muted fe-num" style="left:${x(d.min).toFixed(1)}%">${FE.price(d.min, { short: true })}</div>
+                <div class="spanbar" style="left:${x(d.min).toFixed(1)}%;width:${Math.max(1, x(d.max) - x(d.min)).toFixed(1)}%;background:${spanGradient(d)}"></div>
+                <div class="hi fe-muted fe-num" style="left:${x(d.max).toFixed(1)}%">${FE.price(d.max, { short: true })}</div>
+                <div class="med" style="left:${x(d.median).toFixed(1)}%"></div>
+                ${curMark}
+              </div>
+              <div class="fe-m fe-medium fe-num">⌀ ${FE.price(d.avg, { short: true })}</div>
+            </div>
+            <div class="info fe-xs">
+              <span class="fe-muted fe-nowrap">${FE.esc(FE.t(`volatility.${d.volatility}`))} · <span class="fe-good">↓ ${FE.time(d.minAt)}</span> · <span class="fe-bad">↑ ${FE.time(d.maxAt)}</span></span>
+              ${cmp}
+            </div>
+          </div>`;
+        }).join('');
+        return `<section>${rows}</section>`;
+      }
+
+      // ------------------------------------------------------------- render
+
+      function render(data) {
+        const root = document.getElementById('root');
+        const prev = document.getElementById('hours');
+        if (prev) scrollLeft = prev.scrollLeft;
+        let html = '';
+        if (on('show_now')) html += renderNow(data);
+        if (on('show_hours')) html += renderHours(data);
+        if (on('show_parts')) html += renderParts(data);
+        if (on('show_days')) html += renderDays(data);
+        root.innerHTML = html || `<div class="fe-message fe-s">${FE.esc(FE.t('nothing_selected'))}</div>`;
+        const strip = document.getElementById('hours');
+        if (strip) {
+          strip.scrollLeft = scrollLeft;
+          strip.addEventListener('scroll', () => { scrollLeft = strip.scrollLeft; }, { passive: true });
+          strip.querySelectorAll('.hcol').forEach((el) => {
+            el.addEventListener('click', () => {
+              const from = Number(el.dataset.from);
+              selectedHour = selectedHour === from ? null : from;
+              if (FE.Homey && FE.Homey.hapticFeedback) FE.Homey.hapticFeedback();
+              render(FE.data);
+            });
+          });
+        }
+        FE.fitHeight();
+      }
+
+      function onHomeyReady(Homey) {
+        FE.start(Homey, { render });
+      }
+    </script>
+  </body>
+</html>
